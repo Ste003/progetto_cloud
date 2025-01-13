@@ -21,7 +21,7 @@ public class ToDo {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "is_completed", nullable = false)
+    @Column(name = "is_completed")
     private boolean isCompleted;
 
     @ManyToOne

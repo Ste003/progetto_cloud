@@ -14,8 +14,8 @@ public class User {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "chat_id", nullable = false, unique = true)
-    private String chatId; // ID del bot Telegram per comunicare con l'utente
+    //@Column(name = "chat_id", nullable = false, unique = true)
+    //private String chatId; // ID del bot Telegram per comunicare con l'utente
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -50,13 +50,13 @@ public class User {
         this.username = username;
     }
 
-    public String getChatId() {
-        return chatId;
-    }
+    //public String getChatId() {
+    //    return chatId;
+    //}
 
-    public void setChatId(String chatId) {
-        this.chatId = chatId;
-    }
+    //public void setChatId(String chatId) {
+    //    this.chatId = chatId;
+    //}
 
     public String getPassword() {
         return password;

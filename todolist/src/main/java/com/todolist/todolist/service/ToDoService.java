@@ -36,20 +36,20 @@ public class ToDoService {
         toDoRepository.deleteById(id);
     }
 
-    public void markAsCompleted(Long todoId) {
-        Optional<ToDo> optionalToDo = toDoRepository.findById(todoId);
-        if (optionalToDo.isPresent()) {
-            ToDo toDo = optionalToDo.get();
-            toDo.setCompleted(true);
-            toDoRepository.save(toDo);
-
-            // Invia una notifica agli utenti sottoscritti
-            toDo.getSubscribers().forEach(user -> {
-                telegramBotService.sendMessage(
-                    Long.valueOf(user.getChatId()),
-                    "L'attività \"" + toDo.getTitle() + "\" è stata completata!"
-                );
-            });
-        }
-    }
+    //public void markAsCompleted(Long todoId) {
+    //    Optional<ToDo> optionalToDo = toDoRepository.findById(todoId);
+    //    if (optionalToDo.isPresent()) {
+    //        ToDo toDo = optionalToDo.get();
+    //        toDo.setCompleted(true);
+    //        toDoRepository.save(toDo);
+//
+    //        // Invia una notifica agli utenti sottoscritti
+    //        toDo.getSubscribers().forEach(user -> {
+    //            telegramBotService.sendMessage(
+    //                Long.valueOf(user.getChatId()),
+    //                "L'attività \"" + toDo.getTitle() + "\" è stata completata!"
+    //            );
+    //        });
+    //    }
+    //}
 }
