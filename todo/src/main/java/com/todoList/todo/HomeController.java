@@ -1,10 +1,10 @@
 package com.todoList.todo;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 import com.todoList.todo.entities.TodoItem;
 import com.todoList.todo.repository.TodoItemRepository;
