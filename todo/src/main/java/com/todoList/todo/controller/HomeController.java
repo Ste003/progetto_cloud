@@ -1,15 +1,17 @@
-package com.todoList.todo;
+package com.todoList.todo.controller;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.todoList.todo.entities.TodoItem;
 import com.todoList.todo.repository.TodoItemRepository;
 
 @RestController
+@RequestMapping("/home") // Cambiato per evitare conflitti
 public class HomeController {
 
     private final TodoItemRepository repository;
@@ -19,8 +21,7 @@ public class HomeController {
         this.repository = repository;
     }
 
-    // Mappa la root ("/") e restituisce una pagina HTML con i dati dei Todo
-    @GetMapping(value = "/", produces = "text/html")
+    @GetMapping(produces = "text/html")  // Ora risponde su "/home"
     public String home() {
         List<TodoItem> todos = repository.findAll();
         StringBuilder sb = new StringBuilder("<html><body>");
