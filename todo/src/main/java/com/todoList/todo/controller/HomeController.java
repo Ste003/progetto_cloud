@@ -11,7 +11,7 @@ import com.todoList.todo.entities.TodoItem;
 import com.todoList.todo.repository.TodoItemRepository;
 
 @RestController
-@RequestMapping("/home") // Cambiato per evitare conflitti
+@RequestMapping("/home") // Cambiamo il mapping a /home
 public class HomeController {
 
     private final TodoItemRepository repository;
@@ -21,7 +21,8 @@ public class HomeController {
         this.repository = repository;
     }
 
-    @GetMapping(produces = "text/html")  // Ora risponde su "/home"
+    // Mappa /home e restituisce una pagina HTML con i dati dei Todo
+    @GetMapping(produces = "text/html")
     public String home() {
         List<TodoItem> todos = repository.findAll();
         StringBuilder sb = new StringBuilder("<html><body>");
