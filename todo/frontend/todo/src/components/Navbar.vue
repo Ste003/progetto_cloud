@@ -25,7 +25,6 @@ export default {
     };
   },
   async created() {
-    // Chiamata per recuperare le informazioni dell'utente autenticato
     this.user = await getUser();
   },
 };
@@ -33,23 +32,30 @@ export default {
 
 <style scoped>
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 200px; /* Larghezza sidebar */
+  height: 100vh; /* Occupa tutta l'altezza della pagina */
   background: #333;
-  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
 .nav-links {
   display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .nav-item {
   color: white;
   text-decoration: none;
-  margin: 0 15px;
-  font-weight: bold;
-  padding: 5px 10px;
+  padding: 10px;
+  text-align: center;
+  width: 100%;
 }
 
 .nav-item:hover {
@@ -58,6 +64,7 @@ export default {
 }
 
 .user-info {
+  margin-top: auto;
   color: white;
   font-weight: bold;
 }
