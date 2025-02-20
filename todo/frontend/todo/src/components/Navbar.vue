@@ -1,8 +1,8 @@
 <template>
   <nav class="navbar">
     <div class="nav-links">
-      <router-link to="/" class="nav-item">Login</router-link>
       <router-link to="/home" class="nav-item">Home</router-link>
+      <router-link to="/" class="nav-item">Login</router-link>
       <router-link to="/dashboard" class="nav-item">Dashboard</router-link>
       <router-link to="/profile" class="nav-item">Profilo</router-link> <!-- Nuovo link -->
     </div>
