@@ -2,7 +2,7 @@ package com.todoList.todo.service;
 
 import com.todoList.todo.entities.TodoItem;
 import com.todoList.todo.repository.TodoItemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -11,7 +11,7 @@ public class TodoService {
 
     private final TodoItemRepository todoItemRepository;
 
-    @Autowired
+    //@Autowired Unnecessary `@Autowired` annotation ---> warning dato da vscode
     public TodoService(TodoItemRepository todoItemRepository) {
         this.todoItemRepository = todoItemRepository;
     }
