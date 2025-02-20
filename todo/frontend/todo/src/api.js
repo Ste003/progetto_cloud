@@ -22,17 +22,28 @@ export const addTodo = async (title) => {
     }
 };
 
-export const loginWithGoogle = () => {
+export const loginWithGoogle = async () => {
     // Reindirizza l'utente all'endpoint OAuth2 del backend per iniziare il login
     window.location.href = "http://localhost:8080/oauth2/authorization/google";
-};
+    // Dopo il login, potrebbe essere necessario recuperare i dati dell'utente
+    const user = await getUser();
+    if (user) {
+      window.location.href = "/dashboard";  // Reindirizza l'utente alla dashboard
+    }
+  };
+  
 
 export const getUser = async () => {
     try {
-        const response = await axios.get("http://localhost:8080/user", { withCredentials: true });
-        return response.data;
+      const response = await axios.get("http://localhost:8080/user", { withCredentials: true });
+      console.log("User data:", response.data);  // Stampa i dati dell'utente
+      if (response.data) {
+        localStorage.setItem('user', JSON.stringify(response.data));  // Salva l'utente nel localStorage
+      }
+      return response.data;
     } catch (error) {
-        console.error("Errore nel recupero dell'utente:", error);
-        return null;
+      console.error("Errore nel recupero dell'utente:", error);
+      return null;
     }
-};
+  };
+  
