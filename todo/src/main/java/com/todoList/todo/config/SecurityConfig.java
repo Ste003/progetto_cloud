@@ -16,15 +16,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                // Permetti l'accesso a queste URL (modifica se necessario)
                 .requestMatchers("/", "/login", "/error").permitAll()
-                // Tutte le altre richieste richiedono autenticazione
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
-                // Puoi usare la pagina di login di default (o crearne una personalizzata)
                 .loginPage("/login")
-                // Dopo un login riuscito, reindirizza l'utente al frontend home page
                 .successHandler(customAuthenticationSuccessHandler())
             )
             .logout(logout -> logout
