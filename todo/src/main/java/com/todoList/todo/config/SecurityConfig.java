@@ -1,16 +1,21 @@
 package com.todoList.todo.config;
 
-import java.io.IOException;
-
+import com.todoList.todo.entities.User;
+import com.todoList.todo.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
 
-import com.todoList.todo.entities.User;
-import com.todoList.todo.service.UserService;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -24,51 +29,61 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(authorize -> authorize
+                .cors(cors -> cors.configurationSource(request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(List.of("http://localhost:5173"));
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            config.setAllowCredentials(true);
+            config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+            return config;
+        }))
+                .csrf(csrf -> csrf.disable()) // 🔥 Disabilita CSRF per testare
+                .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/error").permitAll()
                 .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
-                .successHandler(customAuthenticationSuccessHandler())
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .permitAll()
-            );
+                )
+                .oauth2Login(oauth2 -> oauth2
+                .loginPage("/")
+                .defaultSuccessUrl("http://localhost:5173/home", true)
+                )
+                .logout(logout -> logout
+                .logoutUrl("/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204 No Content
+                })
+                );
+
         return http.build();
     }
 
     @Bean
-    @SuppressWarnings("CallToPrintStackTrace")
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // 🔥 Permette il frontend Vue
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true); // 🔥 Permette i cookie di sessione
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-        return (var request, var response, var authentication) -> {
-            try {
-                OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-                // Debug: stampa tutti gli attributi ricevuti
-                System.out.println("OAuth2User attributes: " + oAuth2User.getAttributes());
+        return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+            String email = oAuth2User.getAttribute("email");
 
-                String email = oAuth2User.getAttribute("email");
-                if (email == null) {
-                    throw new IllegalStateException("L'attributo 'email' è mancante nei dati di OAuth2User");
-                }
-
-                if (userService.getUserByEmail(email) == null) {
-                    String name = oAuth2User.getAttribute("name");
-                    User newUser = new User(name, email);
-                    userService.createUser(newUser);
-                    System.out.println("Created new user: " + email);
-                } else {
-                    System.out.println("User already exists: " + email);
-                }
-                
-                // Redirect verso il frontend (usa URL assoluto se necessario)
-                response.sendRedirect("http://localhost:5173/home");
-            } catch (IOException | IllegalStateException e) {
-                e.printStackTrace();
-                // Rilancia l'eccezione per mostrare la pagina di errore
-                throw e;
+            if (userService.getUserByEmail(email) == null) {
+                String name = oAuth2User.getAttribute("name");
+                User newUser = new User(name, email);
+                userService.createUser(newUser);
             }
+
+            response.sendRedirect("http://localhost:5173/home");
         };
     }
 }
