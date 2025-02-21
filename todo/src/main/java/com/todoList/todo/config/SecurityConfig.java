@@ -37,14 +37,15 @@ public class SecurityConfig {
             config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
             return config;
         }))
-                .csrf(csrf -> csrf.disable()) // 🔥 Disabilita CSRF per testare
+                .csrf(csrf -> csrf.disable()) // Disabilita CSRF per testare
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/error").permitAll()
                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                .loginPage("/")
                 .defaultSuccessUrl("http://localhost:5173/home", true)
+                .successHandler(customAuthenticationSuccessHandler()) // Handler di successo
+                .loginPage("/login") // Verifica se hai una pagina di login personalizzata
                 )
                 .logout(logout -> logout
                 .logoutUrl("/logout")
@@ -86,4 +87,5 @@ public class SecurityConfig {
             response.sendRedirect("http://localhost:5173/home");
         };
     }
+
 }
