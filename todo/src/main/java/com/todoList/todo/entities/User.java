@@ -4,14 +4,19 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 @Entity
 @Table(name = "users")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String name;
     private String email;
 
@@ -23,7 +28,12 @@ public class User {
     @ManyToMany(mappedBy = "subscribers")
     private List<TodoItem> subscribedTodos = new ArrayList<>();
 
-    public User() {}
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference
+    private List<TodoItem> todoItems = new ArrayList<>();
+
+    public User() {
+    }
 
     public User(String name, String email) {
         this.name = name;
@@ -31,18 +41,53 @@ public class User {
     }
 
     // Getters e setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getName() {
+        return name;
+    }
 
-    public List<TodoItem> getCreatedTodos() { return createdTodos; }
-    public void setCreatedTodos(List<TodoItem> createdTodos) { this.createdTodos = createdTodos; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public List<TodoItem> getSubscribedTodos() { return subscribedTodos; }
-    public void setSubscribedTodos(List<TodoItem> subscribedTodos) { this.subscribedTodos = subscribedTodos; }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<TodoItem> getCreatedTodos() {
+        return createdTodos;
+    }
+
+    public void setCreatedTodos(List<TodoItem> createdTodos) {
+        this.createdTodos = createdTodos;
+    }
+
+    public List<TodoItem> getSubscribedTodos() {
+        return subscribedTodos;
+    }
+
+    public void setSubscribedTodos(List<TodoItem> subscribedTodos) {
+        this.subscribedTodos = subscribedTodos;
+    }
+
+    // Se non usi Lombok o vuoi essere sicuro che il getter esista:
+    public List<TodoItem> getTodoItems() {
+        return this.todoItems;
+    }
+
+    public void setTodoItems(List<TodoItem> todoItems) {
+        this.todoItems = todoItems;
+    }
+
 }
