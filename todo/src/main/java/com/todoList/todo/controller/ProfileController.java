@@ -2,10 +2,11 @@ package com.todoList.todo.controller;
 
 import com.todoList.todo.dto.TodoItemDTO;
 import com.todoList.todo.dto.UserDTO;
+import com.todoList.todo.entities.TodoItem;
 import com.todoList.todo.entities.User;
 import com.todoList.todo.repository.UserRepository;
-// import com.todoList.todo.repository.TodoItemRepository;
-// import com.todoList.todo.service.UserService;
+import com.todoList.todo.repository.TodoItemRepository;
+import com.todoList.todo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,10 @@ public class ProfileController {
 
     @Autowired
     private UserRepository userRepository;
-
-    // @Autowired
-    // private TodoItemRepository todoItemRepository;
-
-    // @Autowired
-    // private UserService userService;
+    @Autowired
+    private TodoItemRepository todoItemRepository;
+    @Autowired
+    private UserService userService;
 
     @GetMapping
     public ResponseEntity<UserDTO> getUserProfile(@AuthenticationPrincipal OAuth2User principal) {
@@ -60,21 +59,36 @@ public class ProfileController {
 
         return ResponseEntity.ok(userDTO);
     }
-    
+
     // Se desideri mantenere gli altri endpoint (ad esempio, per completare le to-do),
     // lasciali invariati.
-    
     @PutMapping("/todos/{todoId}/complete")
-    public ResponseEntity<String> completeTodo(@PathVariable Long todoId, @AuthenticationPrincipal OAuth2User principal) {
-        // Logica per completare la to-do (come già implementato)
-        // ...
+    public ResponseEntity<String> completeTodo(@PathVariable Long todoId,
+            @AuthenticationPrincipal OAuth2User principal) {
+        // Trova la todo per id
+        TodoItem todo = todoItemRepository.findById(todoId)
+                .orElseThrow(() -> new RuntimeException("Todo non trovata"));
+
+        // Estrai l'email dell'utente autenticato
+        String email = principal.getAttribute("email");
+        User user = userRepository.findByEmail(email);
+
+        // Confronta le email (ignorando eventuali differenze di case)
+        if (todo.getUser() == null || !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare questa to-do.");
+        }
+
+        // Imposta la todo come completata e salvala
+        todo.setCompleted(true);
+        todoItemRepository.save(todo);
         return ResponseEntity.ok("Todo completata con successo");
     }
-    
+
     @GetMapping("/created-todos")
     public List<TodoItemDTO> getCreatedTodos(@AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
         User user = userRepository.findByEmail(email);
+
         return user.getTodoItems().stream()
                 .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted()))
                 .collect(Collectors.toList());
@@ -84,6 +98,7 @@ public class ProfileController {
     public List<TodoItemDTO> getSubscribedTodos(@AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
         User user = userRepository.findByEmail(email);
+
         return user.getSubscribedTodos().stream()
                 .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted()))
                 .collect(Collectors.toList());
