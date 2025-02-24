@@ -90,7 +90,8 @@ public class ProfileController {
         User user = userRepository.findByEmail(email);
 
         return user.getTodoItems().stream()
-                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted()))
+                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted(), 
+                todo.getUser() != null ? todo.getUser().getEmail() : null))
                 .collect(Collectors.toList());
     }
 
@@ -100,7 +101,43 @@ public class ProfileController {
         User user = userRepository.findByEmail(email);
 
         return user.getSubscribedTodos().stream()
-                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted()))
+                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted(), 
+                todo.getUser() != null ? todo.getUser().getEmail() : null))
                 .collect(Collectors.toList());
+    }
+
+    // Endpoint per iscriversi a una Todo
+    @PostMapping("/todos/{todoId}/subscribe")
+    public ResponseEntity<String> subscribeTodo(@PathVariable Long todoId,
+                                                @AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        User currentUser = userRepository.findByEmail(email);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Utente non trovato");
+        }
+        
+        TodoItem todo = todoItemRepository.findById(todoId)
+                .orElseThrow(() -> new RuntimeException("Todo non trovata"));
+        
+        // Se l'utente corrente è il creatore, non può iscriversi
+        if (todo.getUser() != null && todo.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Non puoi iscriverti alla tua todo");
+        }
+        
+        // Verifica se l'utente è già iscritto
+        boolean alreadySubscribed = todo.getSubscribers().stream()
+                .anyMatch(u -> u.getId().equals(currentUser.getId()));
+        if (alreadySubscribed) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Sei già iscritto a questa todo");
+        }
+        
+        // Aggiungi l'utente ai sottoscrittori e salva la todo
+        todo.getSubscribers().add(currentUser);
+        todoItemRepository.save(todo);
+        
+        return ResponseEntity.ok("Iscrizione avvenuta con successo");
     }
 }
