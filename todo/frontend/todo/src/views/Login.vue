@@ -48,7 +48,7 @@ export default {
 
         // 🔥 Rimuovi l'utente dal frontend e reindirizza manualmente
         this.user = null;
-        window.location.href = "/home";
+        window.location.href = "/";
       } catch (error) {
         console.error("Errore durante il logout:", error);
       }
