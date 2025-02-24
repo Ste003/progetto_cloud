@@ -10,15 +10,25 @@
     </div>
 
     <div class="todos-section">
-      <h2>Todo proprietarie dell'utente (completate)</h2>
+      <h2>Todo create da te</h2>
       <ul>
-        <li v-for="todo in completedTodos" :key="todo.id">
+        <li v-for="todo in createdTodos" :key="todo.id">
           {{ todo.title }} - 
           <span v-if="todo.completed">Completata</span>
           <button v-if="!todo.completed" @click="completeTodo(todo.id)">Chiudi</button>
         </li>
       </ul>
-      <p v-if="completedTodos.length === 0">Nessuna todo completata.</p>
+      <p v-if="createdTodos.length === 0">Non hai creato nessuna todo.</p>
+    </div>
+
+    <div class="todos-section">
+      <h2>Todo a cui ti sei iscritto</h2>
+      <ul>
+        <li v-for="todo in subscribedTodos" :key="todo.id">
+          {{ todo.title }} - Completato: {{ todo.completed ? 'Sì' : 'No' }}
+        </li>
+      </ul>
+      <p v-if="subscribedTodos.length === 0">Non sei iscritto a nessuna todo.</p>
     </div>
   </div>
 </template>
@@ -32,28 +42,38 @@ export default {
   data() {
     return {
       user: null,
-      completedTodos: []  // Todo completate create dall'utente
+      createdTodos: [],
+      subscribedTodos: []
     };
   },
   async created() {
     this.user = await getUser();
     if (this.user) {
-      this.fetchCompletedTodos();
+      this.fetchCreatedTodos();
+      this.fetchSubscribedTodos();
     }
   },
   methods: {
-    async fetchCompletedTodos() {
+    async fetchCreatedTodos() {
       try {
-        const response = await axios.get("http://localhost:8080/profile/completed-todos", { withCredentials: true });
-        this.completedTodos = response.data;
+        const response = await axios.get("http://localhost:8080/profile/created-todos", { withCredentials: true });
+        this.createdTodos = response.data;
       } catch (error) {
-        console.error("Errore nel recupero delle todo completate:", error);
+        console.error("Errore nel recupero delle todo create:", error);
+      }
+    },
+    async fetchSubscribedTodos() {
+      try {
+        const response = await axios.get("http://localhost:8080/profile/subscribed-todos", { withCredentials: true });
+        this.subscribedTodos = response.data;
+      } catch (error) {
+        console.error("Errore nel recupero delle todo sottoscritte:", error);
       }
     },
     async completeTodo(todoId) {
       try {
         await axios.put(`http://localhost:8080/profile/todos/${todoId}/complete`, {}, { withCredentials: true });
-        this.fetchCompletedTodos();  // Ricarica la lista per aggiornare lo stato
+        this.fetchCreatedTodos();
       } catch (error) {
         console.error("Errore nel completamento della todo:", error);
       }
@@ -64,7 +84,6 @@ export default {
 
 <style scoped>
 .profile {
-  margin-left: 220px;
   padding: 20px;
 }
 .todos-section {

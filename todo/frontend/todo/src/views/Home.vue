@@ -1,12 +1,12 @@
 <template>
   <div class="home">
-    <h1>Home Page - Lista dei Todo (non completate)</h1>
+    <h1>Home Page - Lista di tutte le Todo</h1>
     <ul>
       <li v-for="todo in todos" :key="todo.id">
         {{ todo.title }} - Completato: {{ todo.completed ? 'Sì' : 'No' }}
       </li>
     </ul>
-    <p v-if="todos.length === 0">Nessun Todo non completata disponibile.</p>
+    <p v-if="todos.length === 0">Nessuna Todo disponibile.</p>
   </div>
 </template>
 
@@ -18,7 +18,7 @@ const todos = ref([]);
 
 const loadTodos = async () => {
   try {
-    const response = await axios.get("http://localhost:8080/api/todos/incomplete", { withCredentials: true });
+    const response = await axios.get("http://localhost:8080/api/todos", { withCredentials: true });
     todos.value = response.data;
   } catch (error) {
     console.error("Errore nel recupero dei Todo:", error);
