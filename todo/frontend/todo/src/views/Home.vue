@@ -4,9 +4,9 @@
     <ul>
       <li v-for="todo in todos" :key="todo.id">
         {{ todo.title }} - Completato: {{ todo.completed ? 'Sì' : 'No' }}
-        <!-- Visualizza il pulsante solo se l'utente corrente non è il creatore -->
+        <!-- Mostra il pulsante "Iscriviti" solo se la todo non è completata e l'utente non è già iscritto -->
         <button 
-          v-if="todo.creatorEmail !== currentUserEmail && !todo.completed" 
+          v-if="!todo.completed && !todo.subscribed" 
           @click="subscribe(todo.id)"
         >
           Iscriviti
@@ -23,24 +23,19 @@ import axios from 'axios';
 
 const todos = ref([]);
 
-// Recupera l'email dell'utente corrente dal localStorage
-const currentUserEmail = localStorage.getItem("userEmail") || "";
-
 const loadTodos = async () => {
   try {
     const response = await axios.get("http://localhost:8080/api/todos", { withCredentials: true });
     todos.value = response.data;
   } catch (error) {
-    console.error("Errore nel recupero dei Todo:", error);
+    console.error("Errore nel recupero delle Todo:", error);
   }
 };
 
 const subscribe = async (todoId) => {
   try {
-    const response = await axios.post(`http://localhost:8080/profile/todos/${todoId}/subscribe`, {}, { withCredentials: true });
-    console.log(response.data);
-    // Ricarica i Todo dopo l'iscrizione
-    await loadTodos();
+    await axios.post(`http://localhost:8080/profile/todos/${todoId}/subscribe`, {}, { withCredentials: true });
+    await loadTodos(); // Ricarica la lista dopo l'iscrizione
   } catch (error) {
     console.error("Errore nell'iscrizione alla Todo:", error);
   }
@@ -60,8 +55,12 @@ ul {
 li {
   padding: 5px;
   border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 button {
-  margin-left: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
 }
 </style>

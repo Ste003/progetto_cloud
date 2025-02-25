@@ -1,0 +1,10 @@
+Frontend:
+- cd .\todo\frontend\todo\
+- npm install
+- npm run build
+- npm run dev
+
+Backend:
+- cd .\todo\
+- mvn clean install
+- mvn spring-boot:run

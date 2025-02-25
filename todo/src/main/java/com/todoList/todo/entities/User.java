@@ -1,12 +1,21 @@
 package com.todoList.todo.entities;
 
-import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -25,7 +34,12 @@ public class User {
     private List<TodoItem> createdTodos = new ArrayList<>();
 
     // To‑do a cui l’utente è iscritto
-    @ManyToMany(mappedBy = "subscribers")
+    @ManyToMany
+    @JoinTable(
+        name = "todo_item_subscribers",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "todo_item_id")
+    )
     private List<TodoItem> subscribedTodos = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
