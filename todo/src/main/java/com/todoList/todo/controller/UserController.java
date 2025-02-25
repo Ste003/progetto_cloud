@@ -38,15 +38,16 @@ public class UserController {
     }
 
     // @GetMapping("/user")
-    // public ResponseEntity<Map<String, Object>> getUser(Authentication authentication) {
-    //     OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-    //     if (oAuth2User != null) {
-    //         Map<String, Object> user = new HashMap<>();
-    //         user.put("name", oAuth2User.getAttribute("name"));
-    //         user.put("email", oAuth2User.getAttribute("email"));
-    //         return ResponseEntity.ok(user);
-    //     }
-    //     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    // public ResponseEntity<Map<String, Object>> getUser(Authentication
+    // authentication) {
+    // OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+    // if (oAuth2User != null) {
+    // Map<String, Object> user = new HashMap<>();
+    // user.put("name", oAuth2User.getAttribute("name"));
+    // user.put("email", oAuth2User.getAttribute("email"));
+    // return ResponseEntity.ok(user);
+    // }
+    // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     // }
 
     // Se non serve restituire il profilo qui, rimuovi o rinomina questo metodo.
@@ -72,13 +73,12 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         List<TodoItemDTO> subscriptions = user.getSubscribedTodos().stream()
-            .map(todo -> new TodoItemDTO(
-                    todo.getId(), 
-                    todo.getTitle(), 
-                    todo.getCompleted(), 
-                    todo.getUser() != null ? todo.getUser().getEmail() : null
-            ))
-            .collect(Collectors.toList());
+                .map(todo -> new TodoItemDTO(
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        todo.getUser() != null ? todo.getUser().getEmail() : null))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(subscriptions);
     }
 
