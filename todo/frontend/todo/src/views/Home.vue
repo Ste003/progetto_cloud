@@ -8,9 +8,10 @@
         <ul>
           <li v-for="todo in incompleteTodos" :key="todo.id">
             <span class="todo-title">{{ todo.title }}</span>
-            <!-- Il pulsante "Iscriviti" viene mostrato solo se la todo non è completata e l'utente non è già iscritto -->
+            <!-- Il pulsante "Iscriviti" viene mostrato solo se la todo non è completata, 
+                 l'utente corrente non è il creatore e non è già iscritto -->
             <button 
-              v-if="!todo.completed && !todo.subscribed" 
+              v-if="!todo.completed && (todo.creatorEmail !== currentUserEmail) && !todo.subscribed" 
               @click="subscribe(todo.id)"
               class="subscribe-btn"
             >
@@ -40,6 +41,7 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
 const todos = ref([]);
+const currentUserEmail = localStorage.getItem("userEmail") || "";
 
 const loadTodos = async () => {
   try {
@@ -66,9 +68,9 @@ onMounted(loadTodos);
 </script>
 
 <style scoped>
-.dashboard {
-  max-width: 90%;
-  margin: 20px auto;
+/* Rimuovi restrizioni fisse e usa tutta la larghezza del viewport */
+.home {
+  width: 80vw;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -79,17 +81,24 @@ onMounted(loadTodos);
   margin-bottom: 30px;
 }
 
+/* Distribuisci le colonne affiancate, senza limitazioni di larghezza */
 .columns {
   display: flex;
-  gap: 40px;
+  flex-direction: row;
+  flex-wrap: nowrap; /* Non permettere il wrapping: rimangono affiancate */
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
 }
 
 .column {
   flex: 1;
+  min-width: 45%; /* Ogni colonna occuperà almeno il 45% dello spazio */
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
 .column h2 {

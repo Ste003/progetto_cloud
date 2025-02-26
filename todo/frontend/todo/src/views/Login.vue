@@ -1,14 +1,17 @@
 <template>
   <div class="login-page">
     <h1>Login</h1>
-    <div v-if="!user">
-      <!-- Se l'utente NON è autenticato, mostra il pulsante di login -->
-      <button class="btn" @click="handleLogin">Login con Google</button>
+    <div v-if="loading">
+      <p>Verifica dello stato di autenticazione in corso...</p>
     </div>
     <div v-else>
-      <!-- Se l'utente è già autenticato, mostra il pulsante di logout -->
-      <p>Sei loggato come: <strong>{{ user.email }}</strong></p>
-      <button class="btn" @click="handleLogout">Logout</button>
+      <div v-if="!user">
+        <button class="btn" @click="handleLogin">Login con Google</button>
+      </div>
+      <div v-else>
+        <p>Sei loggato come: <strong>{{ user.email }}</strong></p>
+        <button class="btn" @click="handleLogout">Logout</button>
+      </div>
     </div>
   </div>
 </template>
@@ -21,23 +24,22 @@ export default {
   data() {
     return {
       user: null,
-      loading: true,  // Variabile per gestire lo stato di caricamento
+      loading: true,
     };
   },
   async created() {
     try {
-      // Verifica se l'utente è già autenticato
       this.user = await getUser();
     } catch (error) {
       console.error("Errore nel recupero dell'utente:", error);
-      this.user = null;  // In caso di errore, non ci sarà un utente autenticato
+      this.user = null;
     } finally {
-      this.loading = false;  // Fine del caricamento
+      this.loading = false;
     }
   },
   methods: {
     handleLogin() {
-      loginWithGoogle(); // Chiamata al login Google
+      loginWithGoogle();
     },
     async handleLogout() {
       try {
@@ -45,8 +47,6 @@ export default {
           method: "POST",
           credentials: "include"
         });
-
-        // 🔥 Rimuovi l'utente dal frontend e reindirizza manualmente
         this.user = null;
         window.location.href = "/";
       } catch (error) {
@@ -57,13 +57,26 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .login-page {
+  width: 50vw;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-top: 100px;
+  justify-content: center; /* Centra verticalmente */
+  align-items: center;     /* Centra orizzontalmente */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 1.2em;
+  text-align: center;
 }
 
 .btn {

@@ -18,11 +18,17 @@ export default {
 </script>
 
 <style>
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
 /* La navbar è fissata con larghezza 200px, quindi il contenuto parte a destra */
 .main-content {
   margin-left: 220px; /* spazio per la navbar */
   padding: 20px;
-  max-width: 1200px;  /* Larghezza massima per il contenuto */
+  max-width: 100%;  /* Larghezza massima per il contenuto */
   margin-right: auto;
   margin-top: 20px;
 }
