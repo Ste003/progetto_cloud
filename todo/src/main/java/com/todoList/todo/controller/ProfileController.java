@@ -20,7 +20,6 @@ import com.todoList.todo.entities.TodoItem;
 import com.todoList.todo.entities.User;
 import com.todoList.todo.repository.TodoItemRepository;
 import com.todoList.todo.repository.UserRepository;
-import com.todoList.todo.service.UserService;
 
 @RestController
 @RequestMapping("/profile")
@@ -32,8 +31,8 @@ public class ProfileController {
     @Autowired
     private TodoItemRepository todoItemRepository;
     
-    @Autowired
-    private UserService userService;
+    // @Autowired
+    // private UserService userService;
 
     // Endpoint per ottenere il profilo completo con le todo create e le iscrizioni
     @GetMapping

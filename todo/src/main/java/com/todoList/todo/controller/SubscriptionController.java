@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.todoList.todo.dto.TodoItemDTO;
 import com.todoList.todo.entities.User;
-import com.todoList.todo.repository.TodoItemRepository;
 import com.todoList.todo.repository.UserRepository;
 
 @RestController
@@ -24,8 +23,8 @@ public class SubscriptionController {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private TodoItemRepository todoItemRepository;
+    // @Autowired
+    // private TodoItemRepository todoItemRepository;
 
     // Endpoint per ottenere le Todo a cui l'utente è iscritto
     @GetMapping
