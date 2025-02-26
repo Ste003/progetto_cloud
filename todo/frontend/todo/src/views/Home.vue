@@ -8,20 +8,20 @@
         <ul>
           <li v-for="todo in incompleteTodos" :key="todo.id">
             <span class="todo-title">{{ todo.title }}</span>
-            <!-- Il pulsante "Iscriviti" viene mostrato solo se la todo non è completata, 
-                 l'utente corrente non è il creatore e non è già iscritto -->
-            <button 
-              v-if="!todo.completed && (todo.creatorEmail !== currentUserEmail) && !todo.subscribed" 
-              @click="subscribe(todo.id)"
-              class="subscribe-btn"
-            >
+
+            <!-- Mostra "Già iscritto" se l'utente è già iscritto -->
+            <span v-if="todo.subscribed" class="subscribed-label">Già iscritto</span>
+
+            <!-- Mostra il pulsante solo se la todo non è completata e l'utente non è già iscritto -->
+            <button v-if="!todo.completed && !todo.subscribed" @click="subscribe(todo.id)" class="subscribe-btn">
               Iscriviti
             </button>
           </li>
         </ul>
+
         <p v-if="incompleteTodos.length === 0" class="empty-msg">Nessuna todo non completata.</p>
       </div>
-      
+
       <!-- Colonna destra: Todo completate -->
       <div class="column completed">
         <h2>Todo completate</h2>
@@ -85,7 +85,8 @@ onMounted(loadTodos);
 .columns {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap; /* Non permettere il wrapping: rimangono affiancate */
+  flex-wrap: nowrap;
+  /* Non permettere il wrapping: rimangono affiancate */
   justify-content: space-between;
   gap: 20px;
   width: 100%;
@@ -93,11 +94,12 @@ onMounted(loadTodos);
 
 .column {
   flex: 1;
-  min-width: 45%; /* Ogni colonna occuperà almeno il 45% dello spazio */
+  min-width: 45%;
+  /* Ogni colonna occuperà almeno il 45% dello spazio */
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
 }
 
