@@ -3,8 +3,8 @@
     <div class="nav-links">
       <router-link to="/home" class="nav-item">Home</router-link>
       <router-link to="/" class="nav-item">Login</router-link>
-      <router-link to="/dashboard" class="nav-item">Dashboard</router-link>
-      <router-link to="/profile" class="nav-item">Profilo</router-link> <!-- Nuovo link -->
+      <router-link to="/subscriptions" class="nav-item">Sottoscrizioni</router-link>
+      <router-link to="/profile" class="nav-item">Profilo</router-link>
     </div>
   </nav>
 </template>
@@ -14,7 +14,7 @@
   position: fixed;
   left: 0;
   top: 0;
-  width: 200px; /* Larghezza sidebar */
+  width: 200px;
   height: 100vh;
   background: #333;
   display: flex;

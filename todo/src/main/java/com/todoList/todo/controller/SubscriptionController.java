@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.todoList.todo.dto.TodoItemDTO;
+import com.todoList.todo.dto.TodoWithSubscribersDTO;
+import com.todoList.todo.dto.UserDTO;
 import com.todoList.todo.entities.User;
 import com.todoList.todo.repository.UserRepository;
 
@@ -43,5 +45,47 @@ public class SubscriptionController {
                         (todo.getUser() != null ? todo.getUser().getEmail() : null)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(subscriptions);
+    }
+
+    // Endpoint per ottenere le todo create da te con i sottoscrittori
+    @GetMapping("/created-todos-subscribers")
+    public ResponseEntity<List<TodoWithSubscribersDTO>> getCreatedTodosWithSubscribers(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = principal.getAttribute("email");
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (!userOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        User user = userOpt.get();
+        List<TodoWithSubscribersDTO> dtos = user.getTodoItems().stream().map(todo -> {
+            List<UserDTO> subscribers = todo.getSubscribers().stream()
+                .map(sub -> new UserDTO(sub.getId(), sub.getName(), sub.getEmail(), null, null))
+                .collect(Collectors.toList());
+            return new TodoWithSubscribersDTO(todo.getId(), todo.getTitle(), todo.getCompleted(), subscribers);
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+    
+    // Endpoint per ottenere le todo a cui sei iscritto con i sottoscrittori
+    @GetMapping("/subscribed-todos-subscribers")
+    public ResponseEntity<List<TodoWithSubscribersDTO>> getSubscribedTodosWithSubscribers(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = principal.getAttribute("email");
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (!userOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        User user = userOpt.get();
+        List<TodoWithSubscribersDTO> dtos = user.getSubscribedTodos().stream().map(todo -> {
+            List<UserDTO> subscribers = todo.getSubscribers().stream()
+                .map(sub -> new UserDTO(sub.getId(), sub.getName(), sub.getEmail(), null, null))
+                .collect(Collectors.toList());
+            return new TodoWithSubscribersDTO(todo.getId(), todo.getTitle(), todo.getCompleted(), subscribers);
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }

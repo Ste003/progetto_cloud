@@ -1,14 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { getUser } from '../api';  // Assicurati di importare correttamente il metodo getUser
+import { getUser } from '../api';
 import Home from '../views/Home.vue';
-import Dashboard from '../views/Dashboard.vue';
-import Profile from '../views/Profile.vue';  // Nuova rotta
+import Subscriptions from '../views/Subscriptions.vue';
+import Profile from '../views/Profile.vue';
 import Login from '../views/Login.vue';
 
 const routes = [
   { path: '/', component: Login },
   { path: '/home', component: Home },
-  { path: '/dashboard', component: Dashboard },
+  { path: '/subscriptions', component: Subscriptions },
   {
     path: '/profile',
     component: Profile,
@@ -33,6 +33,5 @@ router.beforeEach(async (to, from, next) => {
     next();  // Se la rotta non richiede autenticazione, lascia passare
   }
 });
-
 
 export default router;
