@@ -1,10 +1,11 @@
 package com.todoList.todo.repository;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.stereotype.Repository;
 import com.todoList.todo.entities.User;
 
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    // Metodo per trovare un utente tramite email
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 }

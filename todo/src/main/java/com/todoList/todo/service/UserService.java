@@ -1,6 +1,7 @@
 package com.todoList.todo.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class UserService {
     }
 
     // Recupera un utente tramite email
-    public User getUserByEmail(String email) {
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }   
 

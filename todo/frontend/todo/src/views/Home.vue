@@ -33,6 +33,12 @@
         <p v-if="completedTodos.length === 0" class="empty-msg">Nessuna todo completata.</p>
       </div>
     </div>
+    <!-- Sezione per aggiungere una nuova Todo -->
+    <div class="add-todo">
+      <h2>Aggiungi una nuova Todo</h2>
+      <input type="text" v-model="newTodoTitle" placeholder="Inserisci il titolo" class="input-field" />
+      <button @click="addTodo" class="add-btn">Aggiungi</button>
+    </div>
   </div>
 </template>
 
@@ -42,6 +48,7 @@ import axios from 'axios';
 
 const todos = ref([]);
 const currentUserEmail = localStorage.getItem("userEmail") || "";
+const newTodoTitle = ref("");
 
 const loadTodos = async () => {
   try {
@@ -58,6 +65,21 @@ const subscribe = async (todoId) => {
     await loadTodos();
   } catch (error) {
     console.error("Errore nell'iscrizione alla todo:", error);
+  }
+};
+
+const addTodo = async () => {
+  if (!newTodoTitle.value.trim()) return;
+  try {
+    const payload = { title: newTodoTitle.value };
+    await axios.post("http://localhost:8080/api/todos/create", payload, {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" }
+    });
+    newTodoTitle.value = "";
+    await loadTodos();
+  } catch (error) {
+    console.error("Errore nell'aggiunta della todo:", error);
   }
 };
 
@@ -140,9 +162,45 @@ li {
   background-color: #0056b3;
 }
 
+.subscribed-label {
+  color: #28a745;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
 .empty-msg {
   text-align: center;
   color: #777;
   font-style: italic;
+}
+
+.add-todo {
+  margin-top: 40px;
+  text-align: center;
+  width: 100%;
+}
+
+.input-field {
+  padding: 10px;
+  width: 60%;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+  box-sizing: border-box;
+}
+
+.add-btn {
+  padding: 10px 15px;
+  font-size: 1em;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background-color: #218838;
 }
 </style>

@@ -31,9 +31,6 @@ public class ProfileController {
     @Autowired
     private TodoItemRepository todoItemRepository;
     
-    // @Autowired
-    // private UserService userService;
-
     // Endpoint per ottenere il profilo completo con le todo create e le iscrizioni
     @GetMapping
     public ResponseEntity<UserDTO> getUserProfile(@AuthenticationPrincipal OAuth2User principal) {
@@ -41,11 +38,9 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         String email = principal.getAttribute("email");
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-        // Mappa le todo create
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+        
         List<TodoItemDTO> createdTodos = user.getTodoItems().stream()
                 .map(todo -> new TodoItemDTO(
                         todo.getId(), 
@@ -53,7 +48,7 @@ public class ProfileController {
                         todo.getCompleted(), 
                         (todo.getUser() != null ? todo.getUser().getEmail() : null)))
                 .collect(Collectors.toList());
-        // Mappa le todo a cui l'utente è iscritto
+        
         List<TodoItemDTO> subscribedTodos = user.getSubscribedTodos().stream()
                 .map(todo -> new TodoItemDTO(
                         todo.getId(), 
@@ -62,13 +57,7 @@ public class ProfileController {
                         (todo.getUser() != null ? todo.getUser().getEmail() : null)))
                 .collect(Collectors.toList());
         
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setName(user.getName());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setTodoItems(createdTodos);
-        userDTO.setSubscribedTodos(subscribedTodos);
-        
+        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), createdTodos, subscribedTodos);
         return ResponseEntity.ok(userDTO);
     }
     
@@ -79,10 +68,8 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         String email = principal.getAttribute("email");
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         List<TodoItemDTO> createdTodos = user.getTodoItems().stream()
                 .map(todo -> new TodoItemDTO(
                         todo.getId(), 
@@ -100,10 +87,8 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         String email = principal.getAttribute("email");
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         List<TodoItemDTO> subscribedTodos = user.getSubscribedTodos().stream()
                 .map(todo -> new TodoItemDTO(
                         todo.getId(), 
@@ -121,7 +106,8 @@ public class ProfileController {
         TodoItem todo = todoItemRepository.findById(todoId)
                 .orElseThrow(() -> new RuntimeException("Todo non trovata"));
         String email = principal.getAttribute("email");
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         if (todo.getUser() == null || !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare questa to-do.");
         }

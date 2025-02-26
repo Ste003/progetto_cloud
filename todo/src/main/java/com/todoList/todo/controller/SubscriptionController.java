@@ -1,6 +1,7 @@
 package com.todoList.todo.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,26 +24,23 @@ public class SubscriptionController {
     @Autowired
     private UserRepository userRepository;
 
-    // @Autowired
-    // private TodoItemRepository todoItemRepository;
-
-    // Endpoint per ottenere le Todo a cui l'utente è iscritto
     @GetMapping
     public ResponseEntity<List<TodoItemDTO>> getUserSubscriptions(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         String email = principal.getAttribute("email");
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (!userOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+        User user = userOpt.get();
         List<TodoItemDTO> subscriptions = user.getSubscribedTodos().stream()
                 .map(todo -> new TodoItemDTO(
                         todo.getId(),
                         todo.getTitle(),
                         todo.getCompleted(),
-                        todo.getUser() != null ? todo.getUser().getEmail() : null))
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(subscriptions);
     }
