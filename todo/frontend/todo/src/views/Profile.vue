@@ -14,25 +14,25 @@
       <div class="todos-section">
         <h2>Todo create da te</h2>
         <ul>
-          <li v-for="todo in createdTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> -
-            <span class="todo-status">{{ todo.completed ? 'Completata' : 'In sospeso' }}</span>
-            <button v-if="!todo.completed" @click="completeTodo(todo.id)" class="action-btn">
+          <li v-for="todo in createdTodos.filter(todo => !todo.completed)" :key="todo.id">
+            <span class="todo-title">{{ todo.title }}</span> - 
+            <span class="todo-status">In sospeso</span>
+            <button @click="completeTodo(todo.id)" class="action-btn">
               Chiudi
             </button>
           </li>
         </ul>
-        <p v-if="createdTodos.length === 0" class="empty-msg">Non hai creato nessuna todo.</p>
+        <p v-if="createdTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">Non hai creato nessuna todo.</p>
       </div>
       <div class="todos-section">
         <h2>Todo a cui sei iscritto</h2>
         <ul>
-          <li v-for="todo in subscribedTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> -
+          <li v-for="todo in subscribedTodos.filter(todo => !todo.completed)" :key="todo.id">
+            <span class="todo-title">{{ todo.title }}</span> - 
             <span class="todo-status">Completato: {{ todo.completed ? 'Sì' : 'No' }}</span>
           </li>
         </ul>
-        <p v-if="subscribedTodos.length === 0" class="empty-msg">Non sei iscritto a nessuna todo.</p>
+        <p v-if="subscribedTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">Non sei iscritto a nessuna todo.</p>
       </div>
     </div>
 
@@ -42,7 +42,7 @@
         <h2>Todo Incompleti</h2>
         <ul>
           <li v-for="todo in incompleteTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> -
+            <span class="todo-title">{{ todo.title }}</span> - 
             <span class="todo-status">In sospeso</span>
             <button @click="completeTodo(todo.id)" class="action-btn">
               Chiudi
@@ -52,15 +52,44 @@
         <p v-if="incompleteTodos.length === 0" class="empty-msg">Tutte le todo sono state completate.</p>
       </div>
 
-      <div class="todos-section">
+      <div class="todos-section completed-todos">
         <h2>Todo Completate</h2>
         <ul>
           <li v-for="todo in completedTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> -
+            <span class="todo-title">{{ todo.title }}</span> - 
             <span class="todo-status">Completata</span>
           </li>
         </ul>
         <p v-if="completedTodos.length === 0" class="empty-msg">Non ci sono todo completate.</p>
+      </div>
+    </div>
+
+    <!-- Sezione per mostrare/nascondere le todo completate degli utenti -->
+    <div class="todos-section" v-if="!isAdmin">
+      <h2 @click="toggleCompletedTodosVisibility" class="toggle-btn">
+        <span>{{ showCompletedTodos ? 'Nascondi' : 'Mostra' }} Todo Completate</span>
+      </h2>
+      <div v-if="showCompletedTodos">
+        <div class="todos-section completed-todos">
+          <h3>Todo Completate da te</h3>
+          <ul>
+            <li v-for="todo in completedCreatedTodos" :key="todo.id">
+              <span class="todo-title">{{ todo.title }}</span> - 
+              <span class="todo-status">Completata</span>
+            </li>
+          </ul>
+          <p v-if="completedCreatedTodos.length === 0" class="empty-msg">Non hai completato nessuna todo.</p>
+        </div>
+        <div class="todos-section completed-todos">
+          <h3>Todo Completate a cui eri iscritto</h3>
+          <ul>
+            <li v-for="todo in completedSubscribedTodos" :key="todo.id">
+              <span class="todo-title">{{ todo.title }}</span> - 
+              <span class="todo-status">Completata</span>
+            </li>
+          </ul>
+          <p v-if="completedSubscribedTodos.length === 0" class="empty-msg">Non sei iscritto a nessuna todo completata.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -77,24 +106,24 @@ export default {
       createdTodos: [],
       subscribedTodos: [],
       allTodos: [],
-      incompleteTodos: [],  // Todo non completate
-      completedTodos: [],  // Todo completate
+      incompleteTodos: [],
+      completedTodos: [],
+      completedCreatedTodos: [],
+      completedSubscribedTodos: [],
       isAdmin: false,
-      adminEmail: ''  // Variabile per l'email dell'admin
+      adminEmail: '',
+      showCompletedTodos: false,
     };
   },
   async created() {
     try {
-      // Prima recupera l'email dell'admin
       const adminEmailResponse = await axios.get("http://localhost:8080/profile/admin-email", { withCredentials: true });
       this.adminEmail = adminEmailResponse.data;
 
-      // Poi recupera i dati dell'utente
       const response = await axios.get("http://localhost:8080/profile", { withCredentials: true });
       this.user = response.data;
-
+      
       if (this.user) {
-        // Verifica se l'utente è admin basandosi sull'email
         this.isAdmin = this.user.email === this.adminEmail;
         if (this.isAdmin) {
           await this.fetchAllTodos();
@@ -113,7 +142,7 @@ export default {
       try {
         const response = await axios.get("http://localhost:8080/profile/todos", { withCredentials: true });
         this.allTodos = response.data;
-        this.separateTodos(); // Separare le todo completate e non
+        this.separateTodos();
       } catch (error) {
         console.error("Errore nel recupero di tutte le todo:", error);
       }
@@ -158,6 +187,13 @@ export default {
         this.separateTodos();
       } catch (error) {
         console.error("Errore nel chiudere tutte le todo:", error);
+      }
+    },
+    toggleCompletedTodosVisibility() {
+      this.showCompletedTodos = !this.showCompletedTodos;
+      if (this.showCompletedTodos) {
+        this.completedCreatedTodos = this.createdTodos.filter(todo => todo.completed);
+        this.completedSubscribedTodos = this.subscribedTodos.filter(todo => todo.completed);
       }
     }
   }
@@ -253,5 +289,55 @@ li {
 .close-all-container {
   text-align: center;
   margin-bottom: 20px;
+}
+
+.toggle-btn {
+  cursor: pointer;
+  font-size: 1.2em;
+  color: #007bff;
+  text-decoration: underline;
+  margin-top: 20px;
+}
+
+.toggle-btn:hover {
+  color: #0056b3;
+}
+
+.completed-todos {
+  background-color: #f9f9f9; /* Colore di sfondo più chiaro */
+  border: 2px solid #ddd; /* Bordo più spesso */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombra per evidenziare */
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.completed-todos h2, .completed-todos h3 {
+  font-size: 1.5em;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.completed-todos ul {
+  list-style: none;
+  padding: 0;
+}
+
+.completed-todos li {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.completed-todos .todo-title {
+  flex: 1;
+  font-size: 1.2em;
+}
+
+.completed-todos .todo-status {
+  margin-left: 10px;
 }
 </style>
