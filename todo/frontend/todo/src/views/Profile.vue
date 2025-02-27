@@ -30,6 +30,9 @@
           <li v-for="todo in subscribedTodos.filter(todo => !todo.completed)" :key="todo.id">
             <span class="todo-title">{{ todo.title }}</span> - 
             <span class="todo-status">Completato: {{ todo.completed ? 'Sì' : 'No' }}</span>
+            <button v-if="!todo.completed" @click="completeTodo(todo.id)" class="action-btn">
+              Chiudi
+            </button>
           </li>
         </ul>
         <p v-if="subscribedTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">Non sei iscritto a nessuna todo.</p>
@@ -175,6 +178,7 @@ export default {
           this.separateTodos();
         } else {
           await this.fetchCreatedTodos();
+          await this.fetchSubscribedTodos();
         }
       } catch (error) {
         console.error("Errore nel completamento della todo:", error);

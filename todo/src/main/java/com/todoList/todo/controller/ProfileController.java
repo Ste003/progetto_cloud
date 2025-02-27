@@ -167,9 +167,13 @@ public class ProfileController {
 
         // Se l'utente è admin, può completare tutte le todo
         boolean isAdmin = user.getEmail().equals(adminEmail);
-        if (!isAdmin && (todo.getUser() == null || !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail()))) {
+
+        // Se l'utente è né l'autore né un iscritto, non può completare la todo
+        if (!isAdmin && (todo.getUser() == null || !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail()))
+                && (todo.getSubscribers().stream().noneMatch(subscriber -> subscriber.getEmail().equalsIgnoreCase(user.getEmail())))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare questa to-do.");
         }
+
         todo.setCompleted(true);
         todoItemRepository.save(todo);
         return ResponseEntity.ok("Todo completata con successo");
