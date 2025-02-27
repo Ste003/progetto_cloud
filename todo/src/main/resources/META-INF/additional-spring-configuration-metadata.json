@@ -1,0 +1,10 @@
+{
+    "properties": [
+      {
+        "name": "admin.email",
+        "type": "java.lang.String",
+        "description": "Indirizzo email dell'amministratore"
+      }
+    ]
+  }
+  

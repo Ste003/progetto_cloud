@@ -12,7 +12,7 @@ const routes = [
   {
     path: '/profile',
     component: Profile,
-    meta: { requiresAuth: true }  // Aggiungi un flag per il controllo
+    meta: { requiresAuth: true }  // flag per il controllo
   }
 ];
 

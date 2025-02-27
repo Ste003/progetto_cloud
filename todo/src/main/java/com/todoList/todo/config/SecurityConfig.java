@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Optional;
 
 @Configuration
 public class SecurityConfig {
@@ -72,18 +73,34 @@ public class SecurityConfig {
         return source;
     }
 
+    // @Bean
+    // public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+    //     return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+    //         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+    //         String email = oAuth2User.getAttribute("email");
+    //         if (userService.getUserByEmail(email) == null) {
+    //             String name = oAuth2User.getAttribute("name");
+    //             User newUser = new User(name, email);
+    //             userService.createUser(newUser);
+    //         }
+    //         response.sendRedirect("http://localhost:5173/home");
+    //     };
+    // }
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
         return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
             String email = oAuth2User.getAttribute("email");
 
-            if (userService.getUserByEmail(email) == null) {
+            // Verifica se l'utente esiste già
+            Optional<User> existingUserOpt = userService.getUserByEmail(email);
+            if (existingUserOpt.isEmpty()) {
+                // Se non esiste, crea l'utente usando i dati di Google
                 String name = oAuth2User.getAttribute("name");
                 User newUser = new User(name, email);
                 userService.createUser(newUser);
             }
-
+            // Se l'utente esiste, NON aggiorniamo il record, mantenendo il nome già presente (es. "ADMIN")
             response.sendRedirect("http://localhost:5173/home");
         };
     }

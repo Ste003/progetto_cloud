@@ -9,13 +9,13 @@
       <p>Caricamento dati utente...</p>
     </div>
 
-    <div class="todos-container">
-      <!-- Sezione Todo create dall'utente -->
+    <!-- Sezione per utenti normali -->
+    <div v-if="!isAdmin" class="todos-container">
       <div class="todos-section">
         <h2>Todo create da te</h2>
         <ul>
           <li v-for="todo in createdTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> - 
+            <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">{{ todo.completed ? 'Completata' : 'In sospeso' }}</span>
             <button v-if="!todo.completed" @click="completeTodo(todo.id)" class="action-btn">
               Chiudi
@@ -24,17 +24,43 @@
         </ul>
         <p v-if="createdTodos.length === 0" class="empty-msg">Non hai creato nessuna todo.</p>
       </div>
-
-      <!-- Sezione Todo a cui sei iscritto -->
       <div class="todos-section">
-        <h2>Todo a cui ti sei iscritto</h2>
+        <h2>Todo a cui sei iscritto</h2>
         <ul>
           <li v-for="todo in subscribedTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> - 
+            <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">Completato: {{ todo.completed ? 'Sì' : 'No' }}</span>
           </li>
         </ul>
         <p v-if="subscribedTodos.length === 0" class="empty-msg">Non sei iscritto a nessuna todo.</p>
+      </div>
+    </div>
+
+    <!-- Sezione per admin -->
+    <div v-if="isAdmin" class="todos-container">
+      <div class="todos-section">
+        <h2>Todo Incompleti</h2>
+        <ul>
+          <li v-for="todo in incompleteTodos" :key="todo.id">
+            <span class="todo-title">{{ todo.title }}</span> -
+            <span class="todo-status">In sospeso</span>
+            <button @click="completeTodo(todo.id)" class="action-btn">
+              Chiudi
+            </button>
+          </li>
+        </ul>
+        <p v-if="incompleteTodos.length === 0" class="empty-msg">Tutte le todo sono state completate.</p>
+      </div>
+
+      <div class="todos-section">
+        <h2>Todo Completate</h2>
+        <ul>
+          <li v-for="todo in completedTodos" :key="todo.id">
+            <span class="todo-title">{{ todo.title }}</span> -
+            <span class="todo-status">Completata</span>
+          </li>
+        </ul>
+        <p v-if="completedTodos.length === 0" class="empty-msg">Non ci sono todo completate.</p>
       </div>
     </div>
   </div>
@@ -42,7 +68,6 @@
 
 <script>
 import axios from 'axios';
-import { getUser } from '../api';
 
 export default {
   name: "Profile",
@@ -50,17 +75,53 @@ export default {
     return {
       user: null,
       createdTodos: [],
-      subscribedTodos: []
+      subscribedTodos: [],
+      allTodos: [],
+      incompleteTodos: [],  // Todo non completate
+      completedTodos: [],  // Todo completate
+      isAdmin: false,
+      adminEmail: ''  // Variabile per l'email dell'admin
     };
   },
   async created() {
-    this.user = await getUser();
-    if (this.user) {
-      this.fetchCreatedTodos();
-      this.fetchSubscribedTodos();
+    try {
+      // Prima recupera l'email dell'admin
+      const adminEmailResponse = await axios.get("http://localhost:8080/profile/admin-email", { withCredentials: true });
+      this.adminEmail = adminEmailResponse.data;
+
+      // Poi recupera i dati dell'utente
+      const response = await axios.get("http://localhost:8080/profile", { withCredentials: true });
+      this.user = response.data;
+
+      if (this.user) {
+        // Verifica se l'utente è admin basandosi sull'email
+        this.isAdmin = this.user.email === this.adminEmail;
+        if (this.isAdmin) {
+          await this.fetchAllTodos();
+          this.separateTodos();
+        } else {
+          await this.fetchCreatedTodos();
+          await this.fetchSubscribedTodos();
+        }
+      }
+    } catch (error) {
+      console.error("Errore nel recupero del profilo utente:", error);
     }
   },
   methods: {
+    async fetchAllTodos() {
+      try {
+        const response = await axios.get("http://localhost:8080/profile/todos", { withCredentials: true });
+        this.allTodos = response.data;
+        this.separateTodos(); // Separare le todo completate e non
+      } catch (error) {
+        console.error("Errore nel recupero di tutte le todo:", error);
+      }
+    },
+    separateTodos() {
+      this.incompleteTodos = this.allTodos.filter(todo => !todo.completed);
+      this.completedTodos = this.allTodos.filter(todo => todo.completed);
+    },
     async fetchCreatedTodos() {
       try {
         const response = await axios.get("http://localhost:8080/profile/created-todos", { withCredentials: true });
@@ -80,9 +141,23 @@ export default {
     async completeTodo(todoId) {
       try {
         await axios.put(`http://localhost:8080/profile/todos/${todoId}/complete`, {}, { withCredentials: true });
-        this.fetchCreatedTodos();
+        if (this.isAdmin) {
+          await this.fetchAllTodos();
+          this.separateTodos();
+        } else {
+          await this.fetchCreatedTodos();
+        }
       } catch (error) {
         console.error("Errore nel completamento della todo:", error);
+      }
+    },
+    async completeAllTodos() {
+      try {
+        await axios.patch("http://localhost:8080/profile/todos/complete", {}, { withCredentials: true });
+        await this.fetchAllTodos();
+        this.separateTodos();
+      } catch (error) {
+        console.error("Errore nel chiudere tutte le todo:", error);
       }
     }
   }
@@ -90,7 +165,6 @@ export default {
 </script>
 
 <style scoped>
-
 .profile {
   width: 70vw;
   padding: 20px;
@@ -108,23 +182,22 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* Container per le due sezioni todo affiancate */
 .todos-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* Due colonne per Admin */
   gap: 40px;
   width: 100%;
 }
 
 .todos-section {
-  flex: 1;
-  min-width: 45%;  /* Ogni sezione occuperà almeno il 45% della larghezza */
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .todos-section h2 {
@@ -175,5 +248,10 @@ li {
   color: #777;
   font-style: italic;
   margin-top: 20px;
+}
+
+.close-all-container {
+  text-align: center;
+  margin-bottom: 20px;
 }
 </style>
