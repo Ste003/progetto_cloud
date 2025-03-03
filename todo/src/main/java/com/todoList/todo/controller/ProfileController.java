@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 @RequestMapping("/profile")
 public class ProfileController {
 
-    //DA RIMUOVERE SUCCESSIVAMETNE -- SERVE SOLO PER I LOG
     private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
     @Autowired
@@ -46,44 +45,14 @@ public class ProfileController {
     @Value("${admin.email}")
     private String adminEmail;
 
-    //DA RIMUOVERE SUCCESSIVAMETNE
     @PostConstruct
     public void init() {
-        logger.info("Valore di admin.email letto da application.properties: {}", adminEmail);
+        logger.info("Admin email (valore letto da properties): {}", adminEmail);
     }
 
-    // Recupera il profilo completo
-    // Endpoint per ottenere il profilo completo con le todo create e le iscrizioni
-    // @GetMapping
-    // public ResponseEntity<UserDTO> getUserProfile(@AuthenticationPrincipal OAuth2User principal) {
-    //     if (principal == null) {
-    //         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-    //     }
-    //     String email = principal.getAttribute("email");
-    //     User user = userRepository.findByEmail(email)
-    //             .orElseThrow(() -> new RuntimeException("Utente non trovato"));
-    //     List<TodoItemDTO> createdTodos = user.getTodoItems().stream()
-    //             .map(todo -> new TodoItemDTO(
-    //             todo.getId(),
-    //             todo.getTitle(),
-    //             todo.getCompleted(),
-    //             (todo.getUser() != null ? todo.getUser().getEmail() : null)))
-    //             .collect(Collectors.toList());
-    //     List<TodoItemDTO> subscribedTodos = user.getSubscribedTodos().stream()
-    //             .map(todo -> new TodoItemDTO(
-    //             todo.getId(),
-    //             todo.getTitle(),
-    //             todo.getCompleted(),
-    //             (todo.getUser() != null ? todo.getUser().getEmail() : null)))
-    //             .collect(Collectors.toList());
-    //     UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), createdTodos, subscribedTodos);
-    //     return ResponseEntity.ok(userDTO);
-    // }
     @GetMapping
     public ResponseEntity<UserDTO> getUserProfile(@AuthenticationPrincipal OAuth2User principal) {
-        //DA RIMUOVERE SUCCESSIVAMETNE
         logger.info("Admin email (valore letto da properties): {}", adminEmail);
-
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
@@ -92,13 +61,25 @@ public class ProfileController {
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
         List<TodoItemDTO> createdTodos = user.getTodoItems().stream()
-                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null)))
+                .map(todo -> new TodoItemDTO(
+                todo.getId(),
+                todo.getTitle(),
+                todo.getCompleted(),
+                (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                false,
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
+        ))
                 .collect(Collectors.toList());
 
         List<TodoItemDTO> subscribedTodos = user.getSubscribedTodos().stream()
-                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null)))
+                .map(todo -> new TodoItemDTO(
+                todo.getId(),
+                todo.getTitle(),
+                todo.getCompleted(),
+                (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                false,
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
+        ))
                 .collect(Collectors.toList());
 
         UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), createdTodos, subscribedTodos);
@@ -107,36 +88,45 @@ public class ProfileController {
 
     @GetMapping("/admin-email")
     public ResponseEntity<String> getAdminEmail() {
-        return ResponseEntity.ok(adminEmail);  // adminEmail è iniettato da application.properties
+        return ResponseEntity.ok(adminEmail);
     }
 
-    // Recupera le todo create dall'utente
     @GetMapping("/created-todos")
     public ResponseEntity<List<TodoItemDTO>> getCreatedTodos(@AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         List<TodoItemDTO> createdTodos = user.getTodoItems().stream()
-                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null)))
+                .map(todo -> new TodoItemDTO(
+                todo.getId(),
+                todo.getTitle(),
+                todo.getCompleted(),
+                (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                false,
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+        ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(createdTodos);
     }
 
-    // Recupera le todo a cui l'utente è iscritto
     @GetMapping("/subscribed-todos")
     public ResponseEntity<List<TodoItemDTO>> getSubscribedTodos(@AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         List<TodoItemDTO> subscribedTodos = user.getSubscribedTodos().stream()
-                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null)))
+                .map(todo -> new TodoItemDTO(
+                todo.getId(),
+                todo.getTitle(),
+                todo.getCompleted(),
+                (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                false,
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+        ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(subscribedTodos);
     }
 
-    // Endpoint per iscriversi a una todo
     @PostMapping("/todos/{todoId}/subscribe")
     public ResponseEntity<String> subscribeToTodo(@PathVariable Long todoId,
             @AuthenticationPrincipal OAuth2User principal) {
@@ -155,7 +145,6 @@ public class ProfileController {
         }
     }
 
-    // Endpoint per completare una todo
     @PutMapping("/todos/{todoId}/complete")
     public ResponseEntity<String> completeTodo(@PathVariable Long todoId,
             @AuthenticationPrincipal OAuth2User principal) {
@@ -165,51 +154,43 @@ public class ProfileController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
-        // Se l'utente è admin, può completare tutte le todo
         boolean isAdmin = user.getEmail().equals(adminEmail);
-
-        // Se l'utente è né l'autore né un iscritto, non può completare la todo
-        if (!isAdmin && (todo.getUser() == null || !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail()))
-                && (todo.getSubscribers().stream().noneMatch(subscriber -> subscriber.getEmail().equalsIgnoreCase(user.getEmail())))) {
+        if (!isAdmin && (todo.getUser() == null || !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail()))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare questa to-do.");
         }
-
         todo.setCompleted(true);
+        todo.setCompletedBy(user); // Imposta chi ha completato
         todoItemRepository.save(todo);
         return ResponseEntity.ok("Todo completata con successo");
     }
 
-    // Endpoint per permettere all'admin di chiudere tutte le todo
     @PatchMapping("/todos/complete")
     public ResponseEntity<Void> completeAllTodos(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         String email = principal.getAttribute("email");
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (!userOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-
         User user = userOpt.get();
-        // Controllo amministratore, confrontando anche il nome e l'email
         boolean isAdmin = user.getEmail().equals(adminEmail);
         if (!isAdmin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
         List<TodoItem> allTodos = todoItemRepository.findAll();
         for (TodoItem todo : allTodos) {
             if (!todo.getCompleted()) {
                 todo.setCompleted(true);
+                // Per completeAll, potresti decidere di non settare completedBy oppure usare l'admin
+                todo.setCompletedBy(user);
                 todoItemRepository.save(todo);
             }
         }
         return ResponseEntity.ok().build();
     }
 
-    // All'interno del metodo getAllTodos (per esempio)
     @GetMapping("/todos")
     public ResponseEntity<List<TodoItemDTO>> getAllTodos(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
@@ -221,7 +202,6 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         User user = userOpt.get();
-        // Controllo basato solo sull'email
         boolean isAdmin = user.getEmail().equalsIgnoreCase(adminEmail);
         if (!isAdmin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -232,9 +212,10 @@ public class ProfileController {
                 todo.getTitle(),
                 todo.getCompleted(),
                 (todo.getUser() != null ? todo.getUser().getEmail() : null),
-                false)) // Flag subscribed impostato a false
+                false,
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+        ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(todos);
     }
-
 }

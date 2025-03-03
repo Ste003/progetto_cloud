@@ -30,10 +30,7 @@ public class UserController {
 
     @GetMapping("/users/{userId}/profile")
     public UserDTO getUserProfile(@PathVariable Long userId) {
-        // Utilizza il servizio per ottenere l'utente (si assume che il metodo restituisca un User)
         UserDTO user = userService.getUserProfile(userId);
-        // Converti in DTO (eventualmente facendo una conversione simile a ProfileController)
-        // Qui si omette la logica di mapping per brevità.
         return new UserDTO(user.getId(), user.getName(), user.getEmail(), null, null);
     }
 
@@ -64,7 +61,10 @@ public class UserController {
                 todo.getId(), 
                 todo.getTitle(), 
                 todo.getCompleted(), 
-                todo.getUser() != null ? todo.getUser().getEmail() : null))
+                (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                false,
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+            ))
             .collect(Collectors.toList());
 
         return ResponseEntity.ok(subscribedTodos);

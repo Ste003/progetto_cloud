@@ -20,28 +20,40 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // Recupera un utente tramite email
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }   
 
-    // Crea un nuovo utente nel database
     public User createUser(User user) {
         return userRepository.save(user);
     }
+    
     public UserDTO getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<TodoItemDTO> createdTodos = user.getCreatedTodos().stream()
-                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted()))
+                .map(todo -> new TodoItemDTO(
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        null,
+                        false,
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                ))
                 .collect(Collectors.toList());
 
         List<TodoItemDTO> subscribedTodos = user.getSubscribedTodos().stream()
-                .map(todo -> new TodoItemDTO(todo.getId(), todo.getTitle(), todo.getCompleted()))
+                .map(todo -> new TodoItemDTO(
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        null,
+                        false,
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                ))
                 .collect(Collectors.toList());
                 
         return new UserDTO(user.getId(), user.getName(), user.getEmail(), createdTodos, subscribedTodos);
-
     }
 }

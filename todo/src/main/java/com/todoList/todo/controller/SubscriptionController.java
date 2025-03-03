@@ -39,15 +39,18 @@ public class SubscriptionController {
         User user = userOpt.get();
         List<TodoItemDTO> subscriptions = user.getSubscribedTodos().stream()
                 .map(todo -> new TodoItemDTO(
-                        todo.getId(),
-                        todo.getTitle(),
-                        todo.getCompleted(),
-                        (todo.getUser() != null ? todo.getUser().getEmail() : null)))
+                        todo.getId(), 
+                        todo.getTitle(), 
+                        todo.getCompleted(), 
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                        false,
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(subscriptions);
     }
 
-    // Endpoint per ottenere le todo create da te con i sottoscrittori
+    // Gli endpoint per TodoWithSubscribersDTO possono rimanere invariati se non necessitano il nuovo campo
     @GetMapping("/created-todos-subscribers")
     public ResponseEntity<List<TodoWithSubscribersDTO>> getCreatedTodosWithSubscribers(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
@@ -61,14 +64,13 @@ public class SubscriptionController {
         User user = userOpt.get();
         List<TodoWithSubscribersDTO> dtos = user.getTodoItems().stream().map(todo -> {
             List<UserDTO> subscribers = todo.getSubscribers().stream()
-                .map(sub -> new UserDTO(sub.getId(), sub.getName(), sub.getEmail(), null, null))
-                .collect(Collectors.toList());
+                    .map(sub -> new UserDTO(sub.getId(), sub.getName(), sub.getEmail(), null, null))
+                    .collect(Collectors.toList());
             return new TodoWithSubscribersDTO(todo.getId(), todo.getTitle(), todo.getCompleted(), subscribers);
         }).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
     
-    // Endpoint per ottenere le todo a cui sei iscritto con i sottoscrittori
     @GetMapping("/subscribed-todos-subscribers")
     public ResponseEntity<List<TodoWithSubscribersDTO>> getSubscribedTodosWithSubscribers(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
@@ -82,8 +84,8 @@ public class SubscriptionController {
         User user = userOpt.get();
         List<TodoWithSubscribersDTO> dtos = user.getSubscribedTodos().stream().map(todo -> {
             List<UserDTO> subscribers = todo.getSubscribers().stream()
-                .map(sub -> new UserDTO(sub.getId(), sub.getName(), sub.getEmail(), null, null))
-                .collect(Collectors.toList());
+                    .map(sub -> new UserDTO(sub.getId(), sub.getName(), sub.getEmail(), null, null))
+                    .collect(Collectors.toList());
             return new TodoWithSubscribersDTO(todo.getId(), todo.getTitle(), todo.getCompleted(), subscribers);
         }).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);

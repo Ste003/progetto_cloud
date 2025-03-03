@@ -1,11 +1,9 @@
 package com.todoList.todo.controller;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,14 +25,15 @@ import com.todoList.todo.service.TodoService;
 @RequestMapping("/api/todos")
 public class TodoController {
 
-    @Autowired
-    private TodoItemRepository todoItemRepository;
+    private final TodoItemRepository todoItemRepository;
+    private final TodoService todoService;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private TodoService todoService;
-    
-    @Autowired
-    private UserRepository userRepository;
+    public TodoController(TodoItemRepository todoItemRepository, TodoService todoService, UserRepository userRepository) {
+        this.todoItemRepository = todoItemRepository;
+        this.todoService = todoService;
+        this.userRepository = userRepository;
+    }
 
     @GetMapping
     public List<TodoItemDTO> getAllTodos(@AuthenticationPrincipal OAuth2User principal) {
@@ -42,14 +41,13 @@ public class TodoController {
         List<TodoItem> todos = todoItemRepository.findAll();
         return todos.stream()
                 .map(todo -> new TodoItemDTO(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getCompleted(),
-                todo.getUser() != null ? todo.getUser().getEmail() : null,
-                // Calcola se l'utente corrente è già iscritto alla todo
-                todo.getSubscribers().stream()
-                        .anyMatch(subscriber -> subscriber.getEmail().equalsIgnoreCase(currentUserEmail))
-        ))
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                        todo.getSubscribers().stream().anyMatch(subscriber -> subscriber.getEmail().equalsIgnoreCase(currentUserEmail)),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -59,18 +57,18 @@ public class TodoController {
         List<TodoItem> todos = todoItemRepository.findByCompletedFalse();
         return todos.stream()
                 .map(todo -> new TodoItemDTO(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getCompleted(),
-                todo.getUser() != null ? todo.getUser().getEmail() : null,
-                todo.getSubscribers().stream()
-                        .anyMatch(subscriber -> subscriber.getEmail().equalsIgnoreCase(currentUserEmail))
-        ))
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                        todo.getSubscribers().stream().anyMatch(subscriber -> subscriber.getEmail().equalsIgnoreCase(currentUserEmail)),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                ))
                 .collect(Collectors.toList());
     }
 
     @PostMapping("/create")
-    public ResponseEntity<TodoItem> createTodo(@RequestBody Map<String, String> payload,
+    public ResponseEntity<TodoItem> createTodo(@RequestBody java.util.Map<String, String> payload,
             @AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -89,7 +87,7 @@ public class TodoController {
         TodoItem todo = new TodoItem();
         todo.setTitle(title);
         todo.setCompleted(false);
-        todo.setUser(user); // Associa il creatore
+        todo.setUser(user); // Imposta il creatore
 
         TodoItem savedTodo = todoService.createTodo(todo);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTodo);
