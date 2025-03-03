@@ -67,6 +67,7 @@ public class ProfileController {
                 todo.getCompleted(),
                 (todo.getUser() != null ? todo.getUser().getEmail() : null),
                 false,
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
                 (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
         ))
                 .collect(Collectors.toList());
@@ -78,6 +79,7 @@ public class ProfileController {
                 todo.getCompleted(),
                 (todo.getUser() != null ? todo.getUser().getEmail() : null),
                 false,
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
                 (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
         ))
                 .collect(Collectors.toList());
@@ -103,7 +105,8 @@ public class ProfileController {
                 todo.getCompleted(),
                 (todo.getUser() != null ? todo.getUser().getEmail() : null),
                 false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
         ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(createdTodos);
@@ -121,7 +124,8 @@ public class ProfileController {
                 todo.getCompleted(),
                 (todo.getUser() != null ? todo.getUser().getEmail() : null),
                 false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
         ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(subscribedTodos);
@@ -155,18 +159,19 @@ public class ProfileController {
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
         boolean isAdmin = user.getEmail().equals(adminEmail);
-        if (!isAdmin && (todo.getUser() == null || !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail()))) {
+        // Modifica il controllo per permettere anche ai sottoscrittori di completare la todo
+        if (!isAdmin && !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail()) && !todo.getSubscribers().contains(user)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare questa to-do.");
         }
         todo.setCompleted(true);
-        todo.setCompletedBy(user); // Imposta chi ha completato
+        todo.setCompletedBy(user);
         todoItemRepository.save(todo);
         return ResponseEntity.ok("Todo completata con successo");
     }
 
     @PatchMapping("/todos/complete")
     public ResponseEntity<Void> completeAllTodos(@AuthenticationPrincipal OAuth2User principal) {
-        if (principal == null) {
+    if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         String email = principal.getAttribute("email");
@@ -193,7 +198,7 @@ public class ProfileController {
 
     @GetMapping("/todos")
     public ResponseEntity<List<TodoItemDTO>> getAllTodos(@AuthenticationPrincipal OAuth2User principal) {
-        if (principal == null) {
+    if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         String email = principal.getAttribute("email");
@@ -213,7 +218,8 @@ public class ProfileController {
                 todo.getCompleted(),
                 (todo.getUser() != null ? todo.getUser().getEmail() : null),
                 false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
         ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(todos);

@@ -7,7 +7,12 @@
       <section class="column">
         <h2>Le tue Todo con iscritti</h2>
         <div v-for="todo in createdTodos.filter(todo => !todo.completed)" :key="todo.id" class="todo-card">
-          <h3>{{ todo.title }} <span v-if="todo.completed">(Completata ✅)</span></h3>
+          <h3>
+            {{ todo.title }}
+            <span v-if="todo.completed">
+              ({{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }})
+            </span>
+          </h3>
           <p><strong>Iscritti:</strong></p>
           <ul>
             <li v-for="sub in todo.subscribers" :key="sub.id">
@@ -24,7 +29,12 @@
       <section class="column">
         <h2>Todo a cui sei iscritto con altri iscritti</h2>
         <div v-for="todo in subscribedTodos.filter(todo => !todo.completed)" :key="todo.id" class="todo-card">
-          <h3>{{ todo.title }} <span v-if="todo.completed">(Completata ✅)</span></h3>
+          <h3>
+            {{ todo.title }}
+            <span v-if="todo.completed">
+              ({{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }})
+            </span>
+          </h3>
           <p><strong>Altri iscritti:</strong></p>
           <ul>
             <li v-for="sub in todo.subscribers" :key="sub.id">
@@ -44,7 +54,12 @@
       <section class="column">
         <h2>Le tue Todo completate</h2>
         <div v-for="todo in createdTodos.filter(todo => todo.completed)" :key="todo.id" class="todo-card">
-          <h3>{{ todo.title }} <span>(Completata ✅)</span></h3>
+          <h3>
+            {{ todo.title }} 
+            <span>
+              ({{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }})
+            </span>
+          </h3>
           <p><strong>Iscritti:</strong></p>
           <ul>
             <li v-for="sub in todo.subscribers" :key="sub.id">
@@ -59,9 +74,14 @@
 
       <!-- Le Todo completate a cui l'utente è iscritto -->
       <section class="column">
-        <h2>Todo completate a cui sei iscritto</h2>
+        <h2>Todo completate a cui eri iscritto</h2>
         <div v-for="todo in subscribedTodos.filter(todo => todo.completed)" :key="todo.id" class="todo-card">
-          <h3>{{ todo.title }} <span>(Completata ✅)</span></h3>
+          <h3>
+            {{ todo.title }} 
+            <span>
+              ({{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }})
+            </span>
+          </h3>
           <p><strong>Altri iscritti:</strong></p>
           <ul>
             <li v-for="sub in todo.subscribers" :key="sub.id">
@@ -121,7 +141,6 @@ onMounted(() => {
 </script>
 
 <style>
-/* Variabili per il tema chiaro (default) */
 :root {
   --background-color: #ffffff;
   --text-color: #333333;
@@ -131,7 +150,6 @@ onMounted(() => {
   --action-btn-hover-bg: #0056b3;
 }
 
-/* Variabili per il tema scuro */
 .dark-theme {
   --background-color: #1e1e1e;
   --text-color: #f5f5f5;
@@ -221,7 +239,6 @@ onMounted(() => {
   background-color: var(--action-btn-hover-bg);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .subscriptions-container {
     flex-direction: column;

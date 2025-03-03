@@ -39,7 +39,8 @@ public class UserService {
                         todo.getCompleted(),
                         null,
                         false,
-                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
                 ))
                 .collect(Collectors.toList());
 
@@ -50,7 +51,8 @@ public class UserService {
                         todo.getCompleted(),
                         null,
                         false,
-                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
                 ))
                 .collect(Collectors.toList());
                 

@@ -66,7 +66,9 @@
         <ul>
           <li v-for="todo in completedTodos" :key="todo.id">
             <span class="todo-title">{{ todo.title }}</span> - 
-            <span class="todo-status">Completata</span>
+            <span class="todo-status">
+              {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
+            </span>
           </li>
         </ul>
         <p v-if="completedTodos.length === 0" class="empty-msg">
@@ -86,7 +88,9 @@
           <ul>
             <li v-for="todo in completedCreatedTodos" :key="todo.id">
               <span class="todo-title">{{ todo.title }}</span> - 
-              <span class="todo-status">Completata</span>
+              <span class="todo-status">
+                {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
+              </span>
             </li>
           </ul>
           <p v-if="completedCreatedTodos.length === 0" class="empty-msg">
@@ -98,7 +102,9 @@
           <ul>
             <li v-for="todo in completedSubscribedTodos" :key="todo.id">
               <span class="todo-title">{{ todo.title }}</span> - 
-              <span class="todo-status">Completata</span>
+              <span class="todo-status">
+                {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
+              </span>
             </li>
           </ul>
           <p v-if="completedSubscribedTodos.length === 0" class="empty-msg">
@@ -281,7 +287,6 @@ li {
   margin-left: 10px;
 }
 
-/* Pulsanti originali verdi */
 .action-btn {
   padding: 5px 10px;
   background-color: #28a745;
@@ -321,7 +326,6 @@ li {
   color: #0056b3;
 }
 
-/* Sezioni Completed: Uso di variabili per adattarsi al tema */
 .completed-todos {
   background-color: var(--card-bg, #f8f9fa);
   border: 2px solid var(--border-color, #ddd);

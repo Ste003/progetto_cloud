@@ -6,7 +6,8 @@ public class TodoItemDTO {
     private Boolean completed;
     private String creatorEmail; // Email del creatore della todo
     private Boolean subscribed;  // Indica se l'utente corrente è già iscritto
-    private String completedByEmail; // Email dell'utente che ha completato la todo
+    private String completedByEmail; // Email dell'utente che ha completato la todo    
+    private String completedByName;  // Nome dell'utente che ha completato la todo
 
     public TodoItemDTO() {}
 
@@ -40,14 +41,15 @@ public class TodoItemDTO {
         this.completedByEmail = null;
     }
 
-    // Costruttore a 6 parametri, per settare anche completedByEmail
-    public TodoItemDTO(Long id, String title, Boolean completed, String creatorEmail, Boolean subscribed, String completedByEmail) {
+    // Costruttore a 7 parametri, per settare anche completedByEmail e completedByName
+    public TodoItemDTO(Long id, String title, Boolean completed, String creatorEmail, Boolean subscribed, String completedByEmail, String completedByName) {
         this.id = id;
         this.title = title;
         this.completed = completed;
         this.creatorEmail = creatorEmail;
         this.subscribed = subscribed;
         this.completedByEmail = completedByEmail;
+        this.completedByName = completedByName;
     }
 
     // Getters e setters
@@ -91,5 +93,12 @@ public class TodoItemDTO {
     }
     public void setCompletedByEmail(String completedByEmail) { 
         this.completedByEmail = completedByEmail; 
+    }
+
+    public String getCompletedByName() { 
+        return completedByName; 
+    }
+    public void setCompletedByName(String completedByName) { 
+        this.completedByName = completedByName; 
     }
 }

@@ -46,7 +46,8 @@ public class TodoController {
                         todo.getCompleted(),
                         (todo.getUser() != null ? todo.getUser().getEmail() : null),
                         todo.getSubscribers().stream().anyMatch(subscriber -> subscriber.getEmail().equalsIgnoreCase(currentUserEmail)),
-                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
                 ))
                 .collect(Collectors.toList());
     }
@@ -62,7 +63,8 @@ public class TodoController {
                         todo.getCompleted(),
                         (todo.getUser() != null ? todo.getUser().getEmail() : null),
                         todo.getSubscribers().stream().anyMatch(subscriber -> subscriber.getEmail().equalsIgnoreCase(currentUserEmail)),
-                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
                 ))
                 .collect(Collectors.toList());
     }

@@ -27,7 +27,10 @@
         <h2>Todo completate</h2>
         <ul>
           <li v-for="todo in completedTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span>
+            <span class="todo-title">{{ todo.title }}</span> - 
+            <span class="todo-status">
+              {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
+            </span>
           </li>
         </ul>
         <p v-if="completedTodos.length === 0" class="empty-msg">Nessuna todo completata.</p>
@@ -68,7 +71,6 @@ const subscribe = async (todoId) => {
   }
 };
 
-
 const addTodo = async () => {
   if (!newTodoTitle.value.trim()) return;
   try {
@@ -91,7 +93,6 @@ onMounted(loadTodos);
 </script>
 
 <style scoped>
-/* Rimuovi restrizioni fisse e usa tutta la larghezza del viewport */
 .home {
   width: 80vw;
   padding: 20px;
@@ -104,12 +105,10 @@ onMounted(loadTodos);
   margin-bottom: 30px;
 }
 
-/* Distribuisci le colonne affiancate, senza limitazioni di larghezza */
 .columns {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  /* Non permettere il wrapping: rimangono affiancate */
   justify-content: space-between;
   gap: 20px;
   width: 100%;
@@ -118,7 +117,6 @@ onMounted(loadTodos);
 .column {
   flex: 1;
   min-width: 45%;
-  /* Ogni colonna occuperà almeno il 45% dello spazio */
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;

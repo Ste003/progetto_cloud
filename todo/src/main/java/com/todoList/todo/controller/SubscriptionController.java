@@ -44,7 +44,8 @@ public class SubscriptionController {
                         todo.getCompleted(), 
                         (todo.getUser() != null ? todo.getUser().getEmail() : null),
                         false,
-                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
                 ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(subscriptions);

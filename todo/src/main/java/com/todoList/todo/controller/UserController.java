@@ -63,7 +63,8 @@ public class UserController {
                 todo.getCompleted(), 
                 (todo.getUser() != null ? todo.getUser().getEmail() : null),
                 false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null)
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
             ))
             .collect(Collectors.toList());
 
