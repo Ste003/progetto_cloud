@@ -220,6 +220,11 @@ onMounted(() => {
   margin-top: 20px;
 }
 
+/* Sposta la sezione delle todo completate verso il basso */
+.completed-todos-container {
+  margin-top: 40px;
+}
+
 .toggle-completed-btn-container {
   text-align: center;
   margin-top: 20px;
