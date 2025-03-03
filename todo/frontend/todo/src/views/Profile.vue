@@ -22,7 +22,9 @@
             </button>
           </li>
         </ul>
-        <p v-if="createdTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">Non hai creato nessuna todo.</p>
+        <p v-if="createdTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">
+          Non hai creato nessuna todo.
+        </p>
       </div>
       <div class="todos-section">
         <h2>Todo a cui sei iscritto</h2>
@@ -35,7 +37,9 @@
             </button>
           </li>
         </ul>
-        <p v-if="subscribedTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">Non sei iscritto a nessuna todo.</p>
+        <p v-if="subscribedTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">
+          Non sei iscritto a nessuna todo.
+        </p>
       </div>
     </div>
 
@@ -52,7 +56,9 @@
             </button>
           </li>
         </ul>
-        <p v-if="incompleteTodos.length === 0" class="empty-msg">Tutte le todo sono state completate.</p>
+        <p v-if="incompleteTodos.length === 0" class="empty-msg">
+          Tutte le todo sono state completate.
+        </p>
       </div>
 
       <div class="todos-section completed-todos">
@@ -63,7 +69,9 @@
             <span class="todo-status">Completata</span>
           </li>
         </ul>
-        <p v-if="completedTodos.length === 0" class="empty-msg">Non ci sono todo completate.</p>
+        <p v-if="completedTodos.length === 0" class="empty-msg">
+          Non ci sono todo completate.
+        </p>
       </div>
     </div>
 
@@ -81,7 +89,9 @@
               <span class="todo-status">Completata</span>
             </li>
           </ul>
-          <p v-if="completedCreatedTodos.length === 0" class="empty-msg">Non hai completato nessuna todo.</p>
+          <p v-if="completedCreatedTodos.length === 0" class="empty-msg">
+            Non hai completato nessuna todo.
+          </p>
         </div>
         <div class="todos-section completed-todos">
           <h3>Todo Completate a cui eri iscritto</h3>
@@ -91,7 +101,9 @@
               <span class="todo-status">Completata</span>
             </li>
           </ul>
-          <p v-if="completedSubscribedTodos.length === 0" class="empty-msg">Non sei iscritto a nessuna todo completata.</p>
+          <p v-if="completedSubscribedTodos.length === 0" class="empty-msg">
+            Non sei iscritto a nessuna todo completata.
+          </p>
         </div>
       </div>
     </div>
@@ -225,7 +237,6 @@ h1 {
 .todos-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  /* Due colonne per Admin */
   gap: 40px;
   width: 100%;
 }
@@ -238,6 +249,7 @@ h1 {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  background-color: var(--card-bg, #f8f9fa);
 }
 
 .todos-section h2 {
@@ -269,6 +281,7 @@ li {
   margin-left: 10px;
 }
 
+/* Pulsanti originali verdi */
 .action-btn {
   padding: 5px 10px;
   background-color: #28a745;
@@ -277,6 +290,7 @@ li {
   border-radius: 4px;
   cursor: pointer;
   margin-left: 10px;
+  font-size: 1.1em;
 }
 
 .action-btn:hover {
@@ -307,19 +321,21 @@ li {
   color: #0056b3;
 }
 
+/* Sezioni Completed: Uso di variabili per adattarsi al tema */
 .completed-todos {
-  background-color: #f9f9f9; /* Colore di sfondo più chiaro */
-  border: 2px solid #ddd; /* Bordo più spesso */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombra per evidenziare */
+  background-color: var(--card-bg, #f8f9fa);
+  border: 2px solid var(--border-color, #ddd);
+  box-shadow: 0 4px 6px var(--shadow-color, rgba(0, 0, 0, 0.1));
   border-radius: 8px;
   padding: 20px;
   margin-top: 20px;
 }
 
-.completed-todos h2, .completed-todos h3 {
+.completed-todos h2,
+.completed-todos h3 {
   font-size: 1.5em;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--text-color, #333);
 }
 
 .completed-todos ul {
@@ -330,7 +346,7 @@ li {
 .completed-todos li {
   padding: 10px;
   margin-bottom: 10px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--border-color, #ccc);
   display: flex;
   justify-content: space-between;
   align-items: center;

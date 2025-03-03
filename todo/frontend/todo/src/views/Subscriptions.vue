@@ -15,7 +15,9 @@
             </li>
           </ul>
         </div>
-        <p v-if="createdTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">Non hai creato alcuna todo.</p>
+        <p v-if="createdTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">
+          Non hai creato alcuna todo.
+        </p>
       </section>
 
       <!-- Colonna destra: To-Do a cui l'utente è iscritto -->
@@ -30,7 +32,9 @@
             </li>
           </ul>
         </div>
-        <p v-if="subscribedTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">Non sei iscritto a nessuna todo.</p>
+        <p v-if="subscribedTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">
+          Non sei iscritto a nessuna todo.
+        </p>
       </section>
     </div>
 
@@ -48,7 +52,9 @@
             </li>
           </ul>
         </div>
-        <p v-if="createdTodos.filter(todo => todo.completed).length === 0" class="empty-msg">Non hai completato alcuna todo.</p>
+        <p v-if="createdTodos.filter(todo => todo.completed).length === 0" class="empty-msg">
+          Non hai completato alcuna todo.
+        </p>
       </section>
 
       <!-- Le Todo completate a cui l'utente è iscritto -->
@@ -63,7 +69,9 @@
             </li>
           </ul>
         </div>
-        <p v-if="subscribedTodos.filter(todo => todo.completed).length === 0" class="empty-msg">Non sei iscritto a nessuna todo completata.</p>
+        <p v-if="subscribedTodos.filter(todo => todo.completed).length === 0" class="empty-msg">
+          Non sei iscritto a nessuna todo completata.
+        </p>
       </section>
     </div>
 
@@ -112,11 +120,33 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
+/* Variabili per il tema chiaro (default) */
+:root {
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --card-bg: #f8f9fa;
+  --border-color: #ddd;
+  --action-btn-bg: #007bff;
+  --action-btn-hover-bg: #0056b3;
+}
+
+/* Variabili per il tema scuro */
+.dark-theme {
+  --background-color: #1e1e1e;
+  --text-color: #f5f5f5;
+  --card-bg: #333333;
+  --border-color: #555;
+  --action-btn-bg: #0d6efd;
+  --action-btn-hover-bg: #0b5ed7;
+}
+
 .subscriptions-page {
   width: 75vw;
   padding: 20px;
   box-sizing: border-box;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 .title {
@@ -125,31 +155,28 @@ onMounted(() => {
   margin-bottom: 30px;
 }
 
-/* Contenitore delle colonne */
 .subscriptions-container {
   display: flex;
   gap: 20px;
   justify-content: space-between;
 }
 
-/* Colonne */
 .column {
   flex: 1;
-  background: #f8f9fa;
+  background: var(--card-bg);
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 2px 10px var(--border-color);
   min-height: 300px;
 }
 
-/* Card delle Todo */
 .todo-card {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 15px;
-  background: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 5px var(--border-color);
 }
 
 .todo-card h3 {
@@ -165,17 +192,16 @@ onMounted(() => {
 .todo-card li {
   font-size: 1em;
   margin-bottom: 5px;
-  color: #555;
+  color: var(--text-color);
 }
 
 .empty-msg {
   text-align: center;
-  color: #777;
+  color: var(--text-color);
   font-style: italic;
   margin-top: 20px;
 }
 
-/* Pulsante per mostrare/nascondere */
 .toggle-completed-btn-container {
   text-align: center;
   margin-top: 20px;
@@ -183,7 +209,7 @@ onMounted(() => {
 
 .action-btn {
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: var(--action-btn-bg);
   color: white;
   border: none;
   border-radius: 4px;
@@ -192,7 +218,7 @@ onMounted(() => {
 }
 
 .action-btn:hover {
-  background-color: #0056b3;
+  background-color: var(--action-btn-hover-bg);
 }
 
 /* Responsive */
