@@ -9,12 +9,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -30,79 +29,59 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of("http://localhost:5173"));
-            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-            config.setAllowCredentials(true);
-            config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
-            return config;
-        }))
-                .csrf(csrf -> csrf.disable()) // Disabilita CSRF per testare
-                .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/error").permitAll()
+            // Configurazione CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // Disabilita CSRF per facilitare i test (valuta se abilitarlo in produzione)
+            .csrf(csrf -> csrf.disable())
+            // Definizione degli endpoint pubblici e protetti
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/login", "/error", "/telegram/webhook").permitAll()
                 .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
+            )
+            // Configurazione OAuth2 per il login
+            .oauth2Login(oauth2 -> oauth2
                 .defaultSuccessUrl("http://localhost:5173/home", true)
-                .successHandler(customAuthenticationSuccessHandler()) // Handler di successo
-                .loginPage("/login") // Verifica se hai una pagina di login personalizzata
-                )
-                .logout(logout -> logout
+                .successHandler(customAuthenticationSuccessHandler())
+                .loginPage("/login")
+            )
+            // Configurazione del logout
+            .logout(logout -> logout
                 .logoutUrl("/logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204 No Content
+                .logoutSuccessHandler((HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 })
-                );
-
+            );
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // 🔥 Permette il frontend Vue
+        // Permetti il frontend in esecuzione su localhost:5173
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true); // 🔥 Permette i cookie di sessione
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
-    // @Bean
-    // public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-    //     return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
-    //         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-    //         String email = oAuth2User.getAttribute("email");
-    //         if (userService.getUserByEmail(email) == null) {
-    //             String name = oAuth2User.getAttribute("name");
-    //             User newUser = new User(name, email);
-    //             userService.createUser(newUser);
-    //         }
-    //         response.sendRedirect("http://localhost:5173/home");
-    //     };
-    // }
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
         return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
             String email = oAuth2User.getAttribute("email");
-
-            // Verifica se l'utente esiste già
             Optional<User> existingUserOpt = userService.getUserByEmail(email);
             if (existingUserOpt.isEmpty()) {
-                // Se non esiste, crea l'utente usando i dati di Google
                 String name = oAuth2User.getAttribute("name");
                 User newUser = new User(name, email);
                 userService.createUser(newUser);
             }
-            // Se l'utente esiste, NON aggiorniamo il record, mantenendo il nome già presente (es. "ADMIN")
             response.sendRedirect("http://localhost:5173/home");
         };
     }
-
 }

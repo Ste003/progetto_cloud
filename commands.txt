@@ -8,3 +8,13 @@ Backend:
 - cd .\todo\
 - mvn clean install
 - mvn spring-boot:run
+
+
+
+
+
+------
+per il testing del bot telegram ho aggiunto cloudlfare 
+winget install --id Cloudflare.cloudflared
+cloudflared tunnel --url http://localhost:8080 ---------> ti da l'url pubblico a cui collegare il bot telegram
+Invoke-RestMethod -Uri "https://api.telegram.org/bot<TOKEN BOT TELEGRAM>/setWebhook?url=<URL PUBBLICO CHE TI DA CLOUDFLARE>"

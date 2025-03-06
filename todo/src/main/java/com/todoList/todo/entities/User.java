@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,15 +37,18 @@ public class User {
     // To‑do a cui l’utente è iscritto
     @ManyToMany
     @JoinTable(
-        name = "todo_item_subscribers",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "todo_item_id")
+            name = "todo_item_subscribers",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "todo_item_id")
     )
     private List<TodoItem> subscribedTodos = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
     private List<TodoItem> todoItems = new ArrayList<>();
+
+    @Column(name = "telegram_chat_id")
+    private String telegramChatId;
 
     public User() {
     }
@@ -102,6 +106,14 @@ public class User {
 
     public void setTodoItems(List<TodoItem> todoItems) {
         this.todoItems = todoItems;
+    }
+
+    public String getTelegramChatId() {
+        return telegramChatId;
+    }
+
+    public void setTelegramChatId(String telegramChatId) {
+        this.telegramChatId = telegramChatId;
     }
 
 }

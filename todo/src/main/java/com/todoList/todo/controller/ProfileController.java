@@ -24,6 +24,7 @@ import com.todoList.todo.entities.TodoItem;
 import com.todoList.todo.entities.User;
 import com.todoList.todo.repository.TodoItemRepository;
 import com.todoList.todo.repository.UserRepository;
+import com.todoList.todo.service.TelegramNotificationService;
 
 import jakarta.annotation.PostConstruct;
 
@@ -44,6 +45,9 @@ public class ProfileController {
 
     @Value("${admin.email}")
     private String adminEmail;
+
+    @Autowired
+    private TelegramNotificationService telegramNotificationService;
 
     @PostConstruct
     public void init() {
@@ -166,12 +170,19 @@ public class ProfileController {
         todo.setCompleted(true);
         todo.setCompletedBy(user);
         todoItemRepository.save(todo);
+        // Invia notifica al creatore della todo, se registrato con un Telegram chat id
+        if (todo.getUser() != null && todo.getUser().getTelegramChatId() != null) {
+            String message = "La to-do '" + todo.getTitle() + "' è stata completata da " + user.getName();
+            telegramNotificationService.sendNotification(todo.getUser().getTelegramChatId(), message);
+        }
+
+        // (Opzionale) Invia notifiche anche agli iscritti, se desiderato
         return ResponseEntity.ok("Todo completata con successo");
     }
 
     @PatchMapping("/todos/complete")
     public ResponseEntity<Void> completeAllTodos(@AuthenticationPrincipal OAuth2User principal) {
-    if (principal == null) {
+        if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         String email = principal.getAttribute("email");
@@ -198,7 +209,7 @@ public class ProfileController {
 
     @GetMapping("/todos")
     public ResponseEntity<List<TodoItemDTO>> getAllTodos(@AuthenticationPrincipal OAuth2User principal) {
-    if (principal == null) {
+        if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         String email = principal.getAttribute("email");

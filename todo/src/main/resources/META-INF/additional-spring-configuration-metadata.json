@@ -4,6 +4,11 @@
         "name": "admin.email",
         "type": "java.lang.String",
         "description": "Indirizzo email dell'amministratore"
+      },
+      {
+        "name":"telegram.bot.token",
+        "type":"java.lang.String",
+        "description":"Token bot telegram"
       }
     ]
   }
