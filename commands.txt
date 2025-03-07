@@ -14,7 +14,21 @@ Backend:
 
 
 ------
-per il testing del bot telegram ho aggiunto cloudlfare 
+per il testing del bot telegram ho aggiunto cloudlfare - ngrok non andava bene, e nemmeno light tunnel, quindi ho optato per un altra opzione valida, cloudflare
 winget install --id Cloudflare.cloudflared
 cloudflared tunnel --url http://localhost:8080 ---------> ti da l'url pubblico a cui collegare il bot telegram
 Invoke-RestMethod -Uri "https://api.telegram.org/bot<TOKEN BOT TELEGRAM>/setWebhook?url=<URL PUBBLICO CHE TI DA CLOUDFLARE>"
+------
+
+------
+Installare openSSL per il certificato per comunicare con il bot telegram
+link: https://slproweb.com/products/Win32OpenSSL.html
+aggiungere bin alle variabili d'ambiente
+openssl req -newkey rsa:2048 -sha256 -nodes -keyout telegram-webhook.key -x509 -days 365 -out telegram-webhook.pem -subj "/C=IT/ST=<REGIONE>/L=<CITTA'>/O=<URL CLOUDFLARE SENZA HTTPS://>"
+
+se non installato installare curl.exe
+curl.exe --ssl-no-revoke -F "url=<URL CLOUDFLARE>/telegram/webhook" -F "certificate=@telegram-webhook.pem" "https://api.telegram.org/bot<TOKE BOT TELEGRAM>/setWebhook"
+
+aggiungere certificato alla jvm -> da eseguire in powershell come amministratore
+keytool -import -alias telegram_cert -keystore "C:\Program Files\Java\jdk-23\lib\security\cacerts" -file "<PERCORSO AL CERTIFICATO .PEM>" --> il certificato si trova di solito in utenti/tuo utente
+------

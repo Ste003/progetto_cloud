@@ -163,20 +163,33 @@ public class ProfileController {
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
         boolean isAdmin = user.getEmail().equals(adminEmail);
-        // Modifica il controllo per permettere anche ai sottoscrittori di completare la todo
+        // Permette al creatore, agli iscritti o all'admin di completare la todo
         if (!isAdmin && !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail()) && !todo.getSubscribers().contains(user)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare questa to-do.");
         }
+
         todo.setCompleted(true);
         todo.setCompletedBy(user);
         todoItemRepository.save(todo);
-        // Invia notifica al creatore della todo, se registrato con un Telegram chat id
+
+        // Notifica il creatore della todo (se ha registrato un telegram_chat_id)
         if (todo.getUser() != null && todo.getUser().getTelegramChatId() != null) {
             String message = "La to-do '" + todo.getTitle() + "' è stata completata da " + user.getName();
             telegramNotificationService.sendNotification(todo.getUser().getTelegramChatId(), message);
         }
 
-        // (Opzionale) Invia notifiche anche agli iscritti, se desiderato
+        // Notifica tutti gli iscritti che hanno un telegram_chat_id
+        if (todo.getSubscribers() != null && !todo.getSubscribers().isEmpty()) {
+            for (User subscriber : todo.getSubscribers()) {
+                // Evita di notificare il creatore se risultasse anch'esso iscritto
+                if (subscriber.getTelegramChatId() != null
+                        && (todo.getUser() == null || !subscriber.getEmail().equalsIgnoreCase(todo.getUser().getEmail()))) {
+                    String subscriberMessage = "La to-do '" + todo.getTitle() + "' a cui eri iscritto è stata completata da " + user.getName();
+                    telegramNotificationService.sendNotification(subscriber.getTelegramChatId(), subscriberMessage);
+                }
+            }
+        }
+
         return ResponseEntity.ok("Todo completata con successo");
     }
 
