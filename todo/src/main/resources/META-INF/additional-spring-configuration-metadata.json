@@ -9,6 +9,11 @@
         "name":"telegram.bot.token",
         "type":"java.lang.String",
         "description":"Token bot telegram"
+      },
+      {
+        "name":"percorso.java.cacerts",
+        "type":"java.lang.String",
+        "description":"percorso al cacert java"
       }
     ]
   }
