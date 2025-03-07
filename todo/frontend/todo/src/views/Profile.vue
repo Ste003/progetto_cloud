@@ -15,7 +15,7 @@
         <h2>Todo create da te</h2>
         <ul>
           <li v-for="todo in createdTodos.filter(todo => !todo.completed)" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> - 
+            <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">In sospeso</span>
             <button @click="completeTodo(todo.id)" class="action-btn">
               Chiudi
@@ -30,7 +30,7 @@
         <h2>Todo a cui sei iscritto</h2>
         <ul>
           <li v-for="todo in subscribedTodos.filter(todo => !todo.completed)" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> - 
+            <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">Completato: {{ todo.completed ? 'Sì' : 'No' }}</span>
             <button v-if="!todo.completed" @click="completeTodo(todo.id)" class="action-btn">
               Chiudi
@@ -49,7 +49,7 @@
         <h2>Todo Incompleti</h2>
         <ul>
           <li v-for="todo in incompleteTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> - 
+            <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">In sospeso</span>
             <button @click="completeTodo(todo.id)" class="action-btn">
               Chiudi
@@ -65,7 +65,7 @@
         <h2>Todo Completate</h2>
         <ul>
           <li v-for="todo in completedTodos" :key="todo.id">
-            <span class="todo-title">{{ todo.title }}</span> - 
+            <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">
               {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
             </span>
@@ -77,17 +77,18 @@
       </div>
     </div>
 
-    <!-- Sezione per mostrare/nascondere le todo completate degli utenti -->
-    <div class="todos-section" v-if="!isAdmin">
+    <!-- Sezione per mostrare/nascondi le todo completate degli utenti -->
+    <div class="todos-section toggle-section" v-if="!isAdmin">
       <h2 @click="toggleCompletedTodosVisibility" class="toggle-btn">
         <span>{{ showCompletedTodos ? 'Nascondi' : 'Mostra' }} Todo Completate</span>
       </h2>
       <div v-if="showCompletedTodos">
+        <!-- Contenuto della sezione -->
         <div class="todos-section completed-todos">
           <h3>Todo Completate da te</h3>
           <ul>
             <li v-for="todo in completedCreatedTodos" :key="todo.id">
-              <span class="todo-title">{{ todo.title }}</span> - 
+              <span class="todo-title">{{ todo.title }}</span> -
               <span class="todo-status">
                 {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
               </span>
@@ -101,7 +102,7 @@
           <h3>Todo Completate a cui eri iscritto</h3>
           <ul>
             <li v-for="todo in completedSubscribedTodos" :key="todo.id">
-              <span class="todo-title">{{ todo.title }}</span> - 
+              <span class="todo-title">{{ todo.title }}</span> -
               <span class="todo-status">
                 {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
               </span>
@@ -143,7 +144,7 @@ export default {
 
       const response = await axios.get("http://localhost:8080/profile", { withCredentials: true });
       this.user = response.data;
-      
+
       if (this.user) {
         this.isAdmin = this.user.email === this.adminEmail;
         if (this.isAdmin) {
@@ -363,5 +364,10 @@ li {
 
 .completed-todos .todo-status {
   margin-left: 10px;
+}
+
+.toggle-section {
+  margin-top: 15px;
+  /* distanza dai 2 paragrafi superiori */
 }
 </style>
