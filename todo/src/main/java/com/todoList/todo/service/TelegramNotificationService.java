@@ -8,6 +8,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
@@ -19,11 +21,13 @@ import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.annotation.PostConstruct;
 
@@ -82,16 +86,35 @@ public class TelegramNotificationService {
         }
     }
 
+    // @SuppressWarnings("CallToPrintStackTrace")
+    // public void sendNotification(String chatId, String message) {
+    //     String url = "https://api.telegram.org/bot" + botToken + "/sendMessage";
+    //     @SuppressWarnings("deprecation")
+    //     UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+    //             .queryParam("chat_id", chatId)
+    //             .queryParam("text", message);
+    //     try {
+    //         restTemplate.getForObject(builder.toUriString(), String.class);
+    //     } catch (RestClientException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
     @SuppressWarnings("CallToPrintStackTrace")
     public void sendNotification(String chatId, String message) {
         String url = "https://api.telegram.org/bot" + botToken + "/sendMessage";
-        @SuppressWarnings("deprecation")
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("chat_id", chatId)
-                .queryParam("text", message);
+
+        // Crea il body della richiesta con i parametri
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("chat_id", chatId);
+        requestBody.put("text", message);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
         try {
-            restTemplate.getForObject(builder.toUriString(), String.class);
+            restTemplate.postForObject(url, requestEntity, String.class);
         } catch (RestClientException e) {
             e.printStackTrace();
         }
