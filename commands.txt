@@ -11,10 +11,14 @@ Backend:
 
 
 
+-------
+https://console.cloud.google.com/ -----> per oauth2 di google
+-------
+
 
 
 ------
-per il testing del bot telegram ho aggiunto cloudlfare - ngrok non andava bene, e nemmeno light tunnel, quindi ho optato per un altra opzione valida, cloudflare
+per il testing del bot telegram ho aggiunto cloudlfare - ngrok non andava bene, e nemmeno light tunnel, quindi ho optato per un altra opzione valida, cloudflare --> però il certificato self signed non va bene per la produzione, perchè non si auto rinnova
 winget install --id Cloudflare.cloudflared
 cloudflared tunnel --url http://localhost:8080 ---------> ti da l'url pubblico a cui collegare il bot telegram
 Invoke-RestMethod -Uri "https://api.telegram.org/bot<TOKEN BOT TELEGRAM>/setWebhook?url=<URL PUBBLICO CHE TI DA CLOUDFLARE>"
@@ -31,4 +35,61 @@ curl.exe --ssl-no-revoke -F "url=<URL CLOUDFLARE>/telegram/webhook" -F "certific
 
 aggiungere certificato alla jvm -> da eseguire in powershell come amministratore --> percorso jdk da cambiare in base al pc
 keytool -import -alias telegram_cert -keystore "C:\Program Files\Java\jdk-23\lib\security\cacerts" -file "<PERCORSO AL CERTIFICATO .PEM>" --> il certificato si trova di solito in utenti/tuo utente
+
+--> se l'alias è già presente --> keytool -delete -alias telegram_cert -keystore "C:\Program Files\Java\jdk-23\lib\security\cacerts"
 ------
+
+
+
+
+
+
+Ecco una panoramica in ordine dei passaggi che devi seguire:
+
+Avvio del Frontend:
+- npm install
+- npm run build
+- npm run dev
+In questo modo il frontend verrà installato, compilato e avviato in modalità sviluppo.
+
+Avvio del Backend:
+- mvn clean install
+- mvn spring-boot:run
+Così il tuo backend (Spring Boot) verrà compilato e lanciato.
+
+Creazione dell’URL Pubblico:
+- cloudflared tunnel --url http://localhost:8080
+Avvia il tunnel (con Cloudflare Tunnel) per ottenere un URL pubblico, ad esempio:
+Questo URL verrà usato per far raggiungere il tuo webhook dall'esterno.
+
+Generazione del Certificato SSL Self-Signed:
+Utilizza OpenSSL per creare la chiave e il certificato self-signed:
+- openssl req -newkey rsa:2048 -sha256 -nodes -keyout telegram-webhook.key -x509 -days 365 -out telegram-webhook.pem -subj "/C=IT/ST=Lombardia/L=Milano/O=Unibo/CN=phys-championships-authentication-tag.trycloudflare.com"
+Questo comando genera un certificato valido per 365 giorni, con il CN esattamente uguale al tuo URL pubblico.
+
+Importazione del Certificato nella JVM:
+Se l’alias esiste già, elimina quello precedente:
+- keytool -delete -alias telegram_cert -keystore "C:\Program Files\Java\jdk-23\lib\security\cacerts"
+
+Importa il certificato nel keystore:
+- keytool -import -alias telegram_cert -keystore "C:\Program Files\Java\jdk-23\lib\security\cacerts" -file "C:\Users\tommaso.stefani\telegram-webhook.pem"
+Questo assicura che la JVM riconosca il certificato (utile se il tuo backend lo usa per comunicare in HTTPS).
+
+Impostazione del Webhook su Telegram (metodo con cURL):
+Usa cURL per impostare il webhook e caricare il certificato self-signed:
+- curl.exe --ssl-no-revoke -F "url=https://phys-championships-authentication-tag.trycloudflare.com/telegram/webhook" -F "certificate=@C:\Users\tommaso.stefani\telegram-webhook.pem" "https://api.telegram.org/bot<TOKEN>/setWebhook"
+Sostituisci <TOKEN> con il token del tuo bot.
+Nota: Quando usi certificati self-signed, è necessario fornire il certificato a Telegram.
+
+
+
+
+(Opzionale) Impostazione del Webhook tramite PowerShell:
+
+In alternativa (o per verifica) puoi impostare il webhook usando Invoke-RestMethod:
+powershell
+Copia
+Modifica
+Invoke-RestMethod -Uri "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://phys-championships-authentication-tag.trycloudflare.com"
+Se usi questo metodo, non verrà caricato il certificato.
+IMPORTANTE: Con un certificato self-signed è necessario passare il file del certificato (come nel punto 6). Quindi, per il self-signed, preferisci il metodo cURL (passo 6).
