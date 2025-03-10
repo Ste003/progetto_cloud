@@ -77,7 +77,7 @@ Questo assicura che la JVM riconosca il certificato (utile se il tuo backend lo 
 
 Impostazione del Webhook su Telegram (metodo con cURL):
 Usa cURL per impostare il webhook e caricare il certificato self-signed:
-- curl.exe --ssl-no-revoke -F "url=https://phys-championships-authentication-tag.trycloudflare.com/telegram/webhook" -F "certificate=@C:\Users\tommaso.stefani\telegram-webhook.pem" "https://api.telegram.org/bot<TOKEN>/setWebhook"
+- curl.exe --ssl-no-revoke -F "url=https://phys-championships-authentication-tag.trycloudflare.com/telegram/webhook" -F "certificate=C:\Users\tommaso.stefani\telegram-webhook.pem" "https://api.telegram.org/bot<TOKEN>/setWebhook"
 Sostituisci <TOKEN> con il token del tuo bot.
 Nota: Quando usi certificati self-signed, è necessario fornire il certificato a Telegram.
 
