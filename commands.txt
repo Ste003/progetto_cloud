@@ -9,12 +9,21 @@ Backend:
 - mvn clean install
 - mvn spring-boot:run
 
-
+Kafka:
+- docker compose -f https://raw.githubusercontent.com/confluentinc/cp-all-in-one/7.4.0-post/cp-all-in-one/docker-compose.yml up -d
 
 -------
 https://console.cloud.google.com/ -----> per oauth2 di google
 -------
 
+------
+per kafka: 1) avvia kafka 2) verifica che si sia avviato 3) crea un topic chiamato "todo-closed" 4) verifica che il topic esista 5-6) testing locale di kafka
+docker compose -f https://raw.githubusercontent.com/confluentinc/cp-all-in-one/7.4.0-post/cp-all-in-one/docker-compose.yml up -d
+bin/kafka-topics.sh --bootstrap-server localhost:9092 --list -> verifica che kafka si sia attivato
+bin/kafka-topics.sh --create --topic todo-closed --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+bin/kafka-console-producer.sh --topic todo-closed --bootstrap-server localhost:9092 ----> in una console
+bin/kafka-console-consumer.sh --topic todo-closed --bootstrap-server localhost:9092 --from-beginning ---> in un altra console -> se è configurato bene dovresti vedere il messaggio
 
 
 ------
@@ -56,6 +65,9 @@ Avvio del Backend:
 - mvn clean install
 - mvn spring-boot:run
 Così il tuo backend (Spring Boot) verrà compilato e lanciato.
+
+Avvio di Kafka:
+- docker compose -f https://raw.githubusercontent.com/confluentinc/cp-all-in-one/7.4.0-post/cp-all-in-one/docker-compose.yml up -d
 
 Creazione dell’URL Pubblico:
 - cloudflared tunnel --url http://localhost:8080
