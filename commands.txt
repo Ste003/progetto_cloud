@@ -17,14 +17,15 @@ https://console.cloud.google.com/ -----> per oauth2 di google
 -------
 
 ------
-per kafka: 0) scarica il docker compose nella cartella che hai aperto in powershell 1) avvia kafka(devi essere nella stessa cartella del docker compose) 2) verifica che si sia avviato 3) crea un topic chiamato "todo-closed" 4) verifica che il topic esista 5-6) testing locale di kafka
+per kafka: 0) scarica il docker compose nella cartella in cui hai aperto in powershell 1) avvia kafka(devi essere nella stessa cartella del docker compose)-entra nel container 2) verifica che si sia avviato 3) crea un topic chiamato "todo-closed" 4) verifica che il topic esista 5-6) testing locale di kafka
 curl -o docker-compose.yml https://raw.githubusercontent.com/confluentinc/cp-all-in-one/7.4.0-post/cp-all-in-one/docker-compose.yml
-docker compose up -d
+docker compose up -d --force-recreate
+docker exec -it broker bash
 bin/kafka-topics.sh --bootstrap-server localhost:9092 --list -> verifica che kafka si sia attivato
-bin/kafka-topics.sh --create --topic todo-closed --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+kafka-topics --create --topic todo-closed --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 bin/kafka-topics.sh --list --bootstrap-server localhost:9092
-bin/kafka-console-producer.sh --topic todo-closed --bootstrap-server localhost:9092 ----> in una console
-bin/kafka-console-consumer.sh --topic todo-closed --bootstrap-server localhost:9092 --from-beginning ---> in un altra console -> se è configurato bene dovresti vedere il messaggio
+docker exec -it broker kafka-console-producer --topic todo-closed --bootstrap-server localhost:9092 ----> in una console
+docker exec -it broker kafka-console-consumer --topic todo-closed --bootstrap-server localhost:9092 --from-beginning --from-beginning ---> in un altra console -> se è configurato bene dovresti vedere il messaggio
 ------
 
 ------
