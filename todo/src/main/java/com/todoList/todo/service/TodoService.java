@@ -1,28 +1,29 @@
 package com.todoList.todo.service;
 
-import com.todoList.todo.entities.TodoItem;
-import com.todoList.todo.kafka.TodoKafkaProducer;
-import com.todoList.todo.repository.TodoItemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.todoList.todo.entities.TodoItem;
+import com.todoList.todo.kafka.TodoKafkaProducer;
+import com.todoList.todo.repository.TodoItemRepository;
 
 @Service
 public class TodoService {
 
+    private static final Logger log = LoggerFactory.getLogger(TodoService.class);
+
     private final TodoItemRepository todoItemRepository;
-    
-    private TodoKafkaProducer todoKafkaProducer; // Non `final`, perché potrebbe non essere iniettato
+    private final TodoKafkaProducer todoKafkaProducer;
 
-    public TodoService(TodoItemRepository todoItemRepository) {
+    // Iniezione tramite costruttore per garantire che entrambi i bean siano disponibili
+    public TodoService(TodoItemRepository todoItemRepository, TodoKafkaProducer todoKafkaProducer) {
         this.todoItemRepository = todoItemRepository;
-    }
-
-    @Autowired(required = false) // Se Kafka è disponibile, lo iniettiamo
-    public void setTodoKafkaProducer(TodoKafkaProducer todoKafkaProducer) {
         this.todoKafkaProducer = todoKafkaProducer;
+        log.info(">>> Iniezione KafkaProducer completata: {}", todoKafkaProducer);
     }
 
     public List<TodoItem> getAllTodos() {
@@ -38,13 +39,14 @@ public class TodoService {
         TodoItem todo = todoItemRepository.findById(todoId)
                 .orElseThrow(() -> new RuntimeException("To-Do non trovata"));
 
-        if (!Boolean.TRUE.equals(todo.getCompleted())) {
-            todo.setCompleted(true);
-            todoItemRepository.save(todo);
+        log.info(">>> [closeTodo] Chiamato per todoId {}. Stato 'completed' PRIMA: {}", todoId, todo.getCompleted());
 
-            if (todoKafkaProducer != null) { // Evitiamo NullPointerException
-                todoKafkaProducer.sendTodoClosedNotification(todoId, todo.getTitle(), userEmail);
-            }
-        }
+        // Per test, forziamo l'invio della notifica (rimuovi il controllo se funziona)
+        todo.setCompleted(true);
+        todoItemRepository.save(todo);
+        log.info(">>> [closeTodo] To-Do segnata come completata.");
+
+        log.info(">>> [closeTodo] Invio messaggio a Kafka...");
+        todoKafkaProducer.sendTodoClosedNotification(todoId, todo.getTitle(), userEmail);
     }
 }

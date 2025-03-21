@@ -14,6 +14,11 @@
         "name":"percorso.java.cacerts",
         "type":"java.lang.String",
         "description":"percorso al cacert java"
+      },
+      {
+        "name":"kafka.topic.todo",
+        "type":"java.lang.String",
+        "description":"nome topic kafka"
       }
     ]
   }

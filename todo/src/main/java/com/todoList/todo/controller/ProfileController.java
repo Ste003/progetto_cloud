@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -34,7 +34,7 @@ import jakarta.annotation.PostConstruct;
 @RequestMapping("/profile")
 public class ProfileController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
+    //private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -50,12 +50,12 @@ public class ProfileController {
 
     @PostConstruct
     public void init() {
-        logger.info("Admin email (valore letto da properties): {}", adminEmail);
+        //logger.info("Admin email (valore letto da properties): {}", adminEmail);
     }
 
     @GetMapping
     public ResponseEntity<UserDTO> getUserProfile(@AuthenticationPrincipal OAuth2User principal) {
-        logger.info("Admin email (valore letto da properties): {}", adminEmail);
+        //logger.info("Admin email (valore letto da properties): {}", adminEmail);
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
