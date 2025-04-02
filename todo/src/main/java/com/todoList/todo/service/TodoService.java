@@ -19,7 +19,8 @@ public class TodoService {
     private final TodoItemRepository todoItemRepository;
     private final TodoKafkaProducer todoKafkaProducer;
 
-    // Iniezione tramite costruttore per garantire che entrambi i bean siano disponibili
+    // Iniezione tramite costruttore per garantire che entrambi i bean siano
+    // disponibili
     public TodoService(TodoItemRepository todoItemRepository, TodoKafkaProducer todoKafkaProducer) {
         this.todoItemRepository = todoItemRepository;
         this.todoKafkaProducer = todoKafkaProducer;
@@ -41,12 +42,14 @@ public class TodoService {
 
         log.info(">>> [closeTodo] Chiamato per todoId {}. Stato 'completed' PRIMA: {}", todoId, todo.getCompleted());
 
-        // Per test, forziamo l'invio della notifica (rimuovi il controllo se funziona)
+        log.info(">>> [closeTodo] Invio messaggio a Kafka...");
+        todoKafkaProducer.sendTodoClosedNotification(todoId, todo.getTitle(), userEmail);
+        log.info(">>> [closeTodo] Messaggio Kafka inviato correttamente.");
+
+        // Aggiorna lo stato della todo
         todo.setCompleted(true);
         todoItemRepository.save(todo);
         log.info(">>> [closeTodo] To-Do segnata come completata.");
-
-        log.info(">>> [closeTodo] Invio messaggio a Kafka...");
-        todoKafkaProducer.sendTodoClosedNotification(todoId, todo.getTitle(), userEmail);
     }
+
 }

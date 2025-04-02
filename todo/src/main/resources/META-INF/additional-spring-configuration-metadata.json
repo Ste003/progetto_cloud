@@ -16,7 +16,7 @@
         "description":"percorso al cacert java"
       },
       {
-        "name":"kafka.topic.todo",
+        "name":"kafka.topic.todo.closed",
         "type":"java.lang.String",
         "description":"nome topic kafka"
       }

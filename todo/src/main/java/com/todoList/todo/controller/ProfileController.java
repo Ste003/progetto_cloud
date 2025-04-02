@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -27,6 +25,7 @@ import com.todoList.todo.entities.User;
 import com.todoList.todo.repository.TodoItemRepository;
 import com.todoList.todo.repository.UserRepository;
 import com.todoList.todo.service.TelegramNotificationService;
+import com.todoList.todo.service.TodoService;
 
 import jakarta.annotation.PostConstruct;
 
@@ -34,7 +33,10 @@ import jakarta.annotation.PostConstruct;
 @RequestMapping("/profile")
 public class ProfileController {
 
-    //private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
+    // private static final Logger logger =
+    // LoggerFactory.getLogger(ProfileController.class);
+    @Autowired
+    private TodoService todoService;
 
     @Autowired
     private UserRepository userRepository;
@@ -50,12 +52,12 @@ public class ProfileController {
 
     @PostConstruct
     public void init() {
-        //logger.info("Admin email (valore letto da properties): {}", adminEmail);
+        // logger.info("Admin email (valore letto da properties): {}", adminEmail);
     }
 
     @GetMapping
     public ResponseEntity<UserDTO> getUserProfile(@AuthenticationPrincipal OAuth2User principal) {
-        //logger.info("Admin email (valore letto da properties): {}", adminEmail);
+        // logger.info("Admin email (valore letto da properties): {}", adminEmail);
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
@@ -65,26 +67,24 @@ public class ProfileController {
 
         List<TodoItemDTO> createdTodos = user.getTodoItems().stream()
                 .map(todo -> new TodoItemDTO(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null),
-                false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
-        ))
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                        false,
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)))
                 .collect(Collectors.toList());
 
         List<TodoItemDTO> subscribedTodos = user.getSubscribedTodos().stream()
                 .map(todo -> new TodoItemDTO(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null),
-                false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
-        ))
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                        false,
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)))
                 .collect(Collectors.toList());
 
         UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), createdTodos, subscribedTodos);
@@ -103,14 +103,13 @@ public class ProfileController {
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         List<TodoItemDTO> createdTodos = user.getTodoItems().stream()
                 .map(todo -> new TodoItemDTO(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null),
-                false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
-        ))
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                        false,
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(createdTodos);
     }
@@ -122,14 +121,13 @@ public class ProfileController {
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         List<TodoItemDTO> subscribedTodos = user.getSubscribedTodos().stream()
                 .map(todo -> new TodoItemDTO(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null),
-                false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
-        ))
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                        false,
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(subscribedTodos);
     }
@@ -152,29 +150,99 @@ public class ProfileController {
         }
     }
 
+    // @PutMapping("/todos/{todoId}/complete")
+    // public ResponseEntity<String> completeTodo(@PathVariable Long todoId,
+    // @AuthenticationPrincipal OAuth2User principal) {
+    // TodoItem todo = todoItemRepository.findById(todoId)
+    // .orElseThrow(() -> new RuntimeException("Todo non trovata"));
+    // String email = principal.getAttribute("email");
+    // User user = userRepository.findByEmail(email)
+    // .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+    // boolean isAdmin = user.getEmail().equals(adminEmail);
+    // // Permette al creatore, agli iscritti o all'admin di completare la todo
+    // if (!isAdmin && !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail())
+    // && !todo.getSubscribers().contains(user)) {
+    // return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare
+    // questa to-do.");
+    // }
+
+    // todo.setCompleted(true);
+    // todo.setCompletedBy(user);
+    // todoItemRepository.save(todo);
+
+    // // Notifica il creatore della todo (se ha registrato un telegram_chat_id)
+    // if (todo.getUser() != null && todo.getUser().getTelegramChatId() != null) {
+    // String message = "La to-do '" + todo.getTitle() + "' è stata completata da "
+    // + user.getName();
+    // telegramNotificationService.sendNotification(todo.getUser().getTelegramChatId(),
+    // message);
+    // }
+
+    // // Notifica tutti gli iscritti che hanno un telegram_chat_id
+    // if (todo.getSubscribers() != null && !todo.getSubscribers().isEmpty()) {
+    // for (User subscriber : todo.getSubscribers()) {
+    // // Evita di notificare il creatore se risultasse anch'esso iscritto
+    // if (subscriber.getTelegramChatId() != null
+    // && (todo.getUser() == null ||
+    // !subscriber.getEmail().equalsIgnoreCase(todo.getUser().getEmail()))) {
+    // String subscriberMessage = "La to-do '" + todo.getTitle() + "' a cui eri
+    // iscritto è stata completata da " + user.getName();
+    // telegramNotificationService.sendNotification(subscriber.getTelegramChatId(),
+    // subscriberMessage);
+    // }
+    // }
+    // }
+
+    // return ResponseEntity.ok("Todo completata con successo");
+    // }
+
+    // @PutMapping("/todos/{todoId}/complete")
+    // public ResponseEntity<String> completeTodo(@PathVariable Long todoId,
+    // @AuthenticationPrincipal OAuth2User principal) {
+    // String email = principal.getAttribute("email");
+    // User user = userRepository.findByEmail(email)
+    // .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+    // TodoItem todo = todoItemRepository.findById(todoId)
+    // .orElseThrow(() -> new RuntimeException("Todo non trovata"));
+
+    // boolean isAdmin = user.getEmail().equals(adminEmail);
+    // // Permette al creatore, agli iscritti o all'admin di completare la todo
+    // if (!isAdmin && !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail())
+    // && !todo.getSubscribers().contains(user)) {
+    // return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare
+    // questa to-do.");
+    // }
+
+    // todoService.closeTodo(todoId, email);
+
+    // return ResponseEntity.ok("Todo completata con successo");
+    // }
+
     @PutMapping("/todos/{todoId}/complete")
     public ResponseEntity<String> completeTodo(@PathVariable Long todoId,
             @AuthenticationPrincipal OAuth2User principal) {
-        TodoItem todo = todoItemRepository.findById(todoId)
-                .orElseThrow(() -> new RuntimeException("Todo non trovata"));
         String email = principal.getAttribute("email");
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+        TodoItem todo = todoItemRepository.findById(todoId)
+                .orElseThrow(() -> new RuntimeException("Todo non trovata"));
 
         boolean isAdmin = user.getEmail().equals(adminEmail);
         // Permette al creatore, agli iscritti o all'admin di completare la todo
-        if (!isAdmin && !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail()) && !todo.getSubscribers().contains(user)) {
+        if (!isAdmin && !todo.getUser().getEmail().equalsIgnoreCase(user.getEmail())
+                && !todo.getSubscribers().contains(user)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi modificare questa to-do.");
         }
 
-        todo.setCompleted(true);
-        todo.setCompletedBy(user);
-        todoItemRepository.save(todo);
+        todoService.closeTodo(todoId, email);
 
         // Notifica il creatore della todo (se ha registrato un telegram_chat_id)
         if (todo.getUser() != null && todo.getUser().getTelegramChatId() != null) {
-            String message = "La to-do '" + todo.getTitle() + "' è stata completata da " + user.getName();
-            telegramNotificationService.sendNotification(todo.getUser().getTelegramChatId(), message);
+            String message = "La to-do '" + todo.getTitle() + "' è stata completata da "
+                    + user.getName();
+            telegramNotificationService.sendNotification(todo.getUser().getTelegramChatId(),
+                    message);
         }
 
         // Notifica tutti gli iscritti che hanno un telegram_chat_id
@@ -182,9 +250,12 @@ public class ProfileController {
             for (User subscriber : todo.getSubscribers()) {
                 // Evita di notificare il creatore se risultasse anch'esso iscritto
                 if (subscriber.getTelegramChatId() != null
-                        && (todo.getUser() == null || !subscriber.getEmail().equalsIgnoreCase(todo.getUser().getEmail()))) {
-                    String subscriberMessage = "La to-do '" + todo.getTitle() + "' a cui eri iscritto è stata completata da " + user.getName();
-                    telegramNotificationService.sendNotification(subscriber.getTelegramChatId(), subscriberMessage);
+                        && (todo.getUser() == null ||
+                                !subscriber.getEmail().equalsIgnoreCase(todo.getUser().getEmail()))) {
+                    String subscriberMessage = "La to-do '" + todo.getTitle()
+                            + "' a cui eri iscritto è stata completata da " + user.getName();
+                    telegramNotificationService.sendNotification(subscriber.getTelegramChatId(),
+                            subscriberMessage);
                 }
             }
         }
@@ -211,7 +282,8 @@ public class ProfileController {
         for (TodoItem todo : allTodos) {
             if (!todo.getCompleted()) {
                 todo.setCompleted(true);
-                // Per completeAll, potresti decidere di non settare completedBy oppure usare l'admin
+                // Per completeAll, potresti decidere di non settare completedBy oppure usare
+                // l'admin
                 todo.setCompletedBy(user);
                 todoItemRepository.save(todo);
             }
@@ -236,14 +308,13 @@ public class ProfileController {
         }
         List<TodoItemDTO> todos = todoItemRepository.findAll().stream()
                 .map(todo -> new TodoItemDTO(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getCompleted(),
-                (todo.getUser() != null ? todo.getUser().getEmail() : null),
-                false,
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
-                (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
-        ))
+                        todo.getId(),
+                        todo.getTitle(),
+                        todo.getCompleted(),
+                        (todo.getUser() != null ? todo.getUser().getEmail() : null),
+                        false,
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
+                        (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(todos);
     }

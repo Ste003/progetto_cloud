@@ -9,8 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class TodoKafkaProducer {
-    @Value("${kafka.topic.todo-closed}")
-    private String TOPIC;
+    @Value("${spring.kafka.consumer.group-id}")
+    private String groupId;
+    
+    @Value("${kafka.topic.todo.closed}")
+    private String topic; // Nota: il nome della proprietà è letto in "topic"
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -24,8 +27,17 @@ public class TodoKafkaProducer {
             TodoClosedEvent event = new TodoClosedEvent(todoId, title, userEmail);
             String message = objectMapper.writeValueAsString(event);
             System.out.println(">>> [Producer] Invio notifica Kafka: " + message);
-            kafkaTemplate.send(TOPIC, message);
-            // Per forzare l'invio, puoi anche chiamare kafkaTemplate.flush();
+            kafkaTemplate.send(topic, groupId, message)
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            System.err.println(">>> [Producer] Errore nell'invio del messaggio: " + ex.getMessage());
+                        } else {
+                            System.out.println(">>> [Producer] Messaggio inviato con successo!");
+                        }
+                    });
+            kafkaTemplate.flush();
+
+            kafkaTemplate.flush();
         } catch (JsonProcessingException e) {
             System.err.println(">>> [Producer] Errore serializzazione evento: " + e.getMessage());
         }

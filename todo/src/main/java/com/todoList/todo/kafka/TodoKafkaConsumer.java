@@ -1,6 +1,8 @@
 package com.todoList.todo.kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -10,21 +12,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class TodoKafkaConsumer {
 
+    private static final Logger log = LoggerFactory.getLogger(TodoKafkaConsumer.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @KafkaListener(topics = { "todo-closed" }, groupId = "todo-notification-group")
+    @KafkaListener(topics = "todo-closed", groupId = "todo-notification-group")
     public void listen(ConsumerRecord<String, String> record) {
+        String json = record.value();
+        log.debug(">>> [Consumer] Messaggio grezzo ricevuto: {}", json);
         try {
-            String json = record.value();
             TodoClosedEvent event = objectMapper.readValue(json, TodoClosedEvent.class);
-
-            System.out.println("====== Ricevuto Evento Kafka ======");
-            System.out.println("To-Do ID: " + event.getTodoId());
-            System.out.println("Titolo: " + event.getTitle());
-            System.out.println("Utente: " + event.getUserEmail());
-            System.out.println("===================================");
+            log.info("====== Ricevuto Evento Kafka ======");
+            log.info("To-Do ID: {}", event.getTodoId());
+            log.info("Titolo: {}", event.getTitle());
+            log.info("Utente: {}", event.getUserEmail());
+            log.info("===================================");
         } catch (JsonProcessingException e) {
-            System.err.println(">>> [Consumer] Errore parsing messaggio Kafka: " + e.getMessage());
+            log.error(">>> [Consumer] Errore parsing messaggio Kafka: {}", e.getMessage());
         }
     }
 }
