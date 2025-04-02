@@ -9,33 +9,45 @@ import org.springframework.web.bind.annotation.RestController;
 import com.todoList.todo.entities.TodoItem;
 import com.todoList.todo.repository.TodoItemRepository;
 
+/**
+ * Controller per la gestione della home.
+ * - Espone un endpoint per visualizzare la lista delle To-Do in formato HTML.
+ */
 @RestController
-@RequestMapping("/home") // Cambiamo il mapping a /home
+@RequestMapping("/home") // Mappa il controller sull'endpoint /home
 public class HomeController {
 
     private final TodoItemRepository repository;
 
-    //@Autowired Unnecessary `@Autowired` annotation ---> warning dato da vscode
+    /**
+     * Costruttore per iniezione delle dipendenze.
+     * Spring gestisce automaticamente l'iniezione senza bisogno di `@Autowired`.
+     */
     public HomeController(TodoItemRepository repository) {
         this.repository = repository;
     }
 
-    // Mappa /home e restituisce una pagina HTML con i dati dei Todo
+    /**
+     * Recupera tutte le To-Do e le restituisce come una pagina HTML.
+     */
     @GetMapping(produces = "text/html")
     public String home() {
-        List<TodoItem> todos = repository.findAll();
+        List<TodoItem> todos = repository.findAll(); // Recupera tutte le To-Do dal database
+
+        // Costruisce dinamicamente una pagina HTML con la lista delle To-Do
         StringBuilder sb = new StringBuilder("<html><body>");
         sb.append("<h1>Todo List</h1>");
         sb.append("<ul>");
         for (TodoItem todo : todos) {
             sb.append("<li>")
-              .append(todo.getTitle())
+              .append(todo.getTitle()) // Titolo della To-Do
               .append(" - Completato: ")
-              .append(todo.getCompleted())
+              .append(todo.getCompleted()) // Stato di completamento
               .append("</li>");
         }
         sb.append("</ul>");
         sb.append("</body></html>");
-        return sb.toString();
+        
+        return sb.toString(); // Restituisce la stringa HTML generata
     }
 }

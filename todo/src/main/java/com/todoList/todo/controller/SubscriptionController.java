@@ -19,22 +19,36 @@ import com.todoList.todo.dto.UserDTO;
 import com.todoList.todo.entities.User;
 import com.todoList.todo.repository.UserRepository;
 
+/**
+ * Controller per la gestione delle iscrizioni alle To-Do e del profilo utente.
+ * 
+ * Espone endpoint per:
+ * - Recuperare le To-Do alle quali l'utente è iscritto
+ * - Recuperare le To-Do create (con i relativi sottoscrittori)
+ * - Iscrivere l'utente a una To-Do
+ * - Completare le To-Do (incluso l'invio delle notifiche)
+ * - Altri endpoint relativi al profilo
+ */
 @RestController
-@RequestMapping("/api/subscriptions")
+@RequestMapping("/api/subscriptions") // Mappa il controller sull'endpoint /api/subscriptions
 public class SubscriptionController {
 
+    // Repository per accedere ai dati degli utenti
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Recupera le To-Do alle quali l'utente è iscritto.
+     */
     @GetMapping
     public ResponseEntity<List<TodoItemDTO>> getUserSubscriptions(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Restituisce 401 se l'utente non è autenticato
         }
         String email = principal.getAttribute("email");
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (!userOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Restituisce 404 se l'utente non è trovato
         }
         User user = userOpt.get();
         List<TodoItemDTO> subscriptions = user.getSubscribedTodos().stream()
@@ -48,19 +62,21 @@ public class SubscriptionController {
                         (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
                 ))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(subscriptions);
+        return ResponseEntity.ok(subscriptions); // Restituisce la lista delle To-Do alle quali l'utente è iscritto
     }
 
-    // Gli endpoint per TodoWithSubscribersDTO possono rimanere invariati se non necessitano il nuovo campo
+    /**
+     * Recupera le To-Do create dall'utente con i relativi sottoscrittori.
+     */
     @GetMapping("/created-todos-subscribers")
     public ResponseEntity<List<TodoWithSubscribersDTO>> getCreatedTodosWithSubscribers(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Restituisce 401 se l'utente non è autenticato
         }
         String email = principal.getAttribute("email");
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (!userOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Restituisce 404 se l'utente non è trovato
         }
         User user = userOpt.get();
         List<TodoWithSubscribersDTO> dtos = user.getTodoItems().stream().map(todo -> {
@@ -69,18 +85,21 @@ public class SubscriptionController {
                     .collect(Collectors.toList());
             return new TodoWithSubscribersDTO(todo.getId(), todo.getTitle(), todo.getCompleted(), subscribers);
         }).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(dtos); // Restituisce la lista delle To-Do create dall'utente con i relativi sottoscrittori
     }
     
+    /**
+     * Recupera le To-Do alle quali l'utente è iscritto con i relativi sottoscrittori.
+     */
     @GetMapping("/subscribed-todos-subscribers")
     public ResponseEntity<List<TodoWithSubscribersDTO>> getSubscribedTodosWithSubscribers(@AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Restituisce 401 se l'utente non è autenticato
         }
         String email = principal.getAttribute("email");
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (!userOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Restituisce 404 se l'utente non è trovato
         }
         User user = userOpt.get();
         List<TodoWithSubscribersDTO> dtos = user.getSubscribedTodos().stream().map(todo -> {
@@ -89,6 +108,6 @@ public class SubscriptionController {
                     .collect(Collectors.toList());
             return new TodoWithSubscribersDTO(todo.getId(), todo.getTitle(), todo.getCompleted(), subscribers);
         }).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(dtos); // Restituisce la lista delle To-Do alle quali l'utente è iscritto con i relativi sottoscrittori
     }
 }

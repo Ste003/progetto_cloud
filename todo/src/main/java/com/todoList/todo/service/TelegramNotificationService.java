@@ -31,6 +31,9 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Servizio per inviare notifiche Telegram.
+ */
 @Service
 public class TelegramNotificationService {
 
@@ -42,11 +45,17 @@ public class TelegramNotificationService {
 
     private RestTemplate restTemplate;
 
+    /**
+     * Metodo di inizializzazione chiamato dopo la costruzione del bean.
+     */
     @PostConstruct
     public void init() {
         this.restTemplate = createSecureRestTemplate();
     }
 
+    /**
+     * Crea un RestTemplate sicuro con configurazione SSL.
+     */
     private RestTemplate createSecureRestTemplate() {
         try {
             // Carica il truststore usando il percorso specificato nella proprietà
@@ -60,8 +69,7 @@ public class TelegramNotificationService {
                     .loadTrustMaterial(trustStore, (X509Certificate[] chain, String authType) -> true)
                     .build();
 
-            // Costruisci un SSLConnectionSocketFactory e un HttpClient con questo
-            // SSLContext
+            // Costruisci un SSLConnectionSocketFactory e un HttpClient con questo SSLContext
             @SuppressWarnings("deprecation")
             SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
             @SuppressWarnings("deprecation")
@@ -86,19 +94,9 @@ public class TelegramNotificationService {
         }
     }
 
-    // @SuppressWarnings("CallToPrintStackTrace")
-    // public void sendNotification(String chatId, String message) {
-    //     String url = "https://api.telegram.org/bot" + botToken + "/sendMessage";
-    //     @SuppressWarnings("deprecation")
-    //     UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-    //             .queryParam("chat_id", chatId)
-    //             .queryParam("text", message);
-    //     try {
-    //         restTemplate.getForObject(builder.toUriString(), String.class);
-    //     } catch (RestClientException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
+    /**
+     * Invia una notifica Telegram.
+     */
     @SuppressWarnings("CallToPrintStackTrace")
     public void sendNotification(String chatId, String message) {
         String url = "https://api.telegram.org/bot" + botToken + "/sendMessage";

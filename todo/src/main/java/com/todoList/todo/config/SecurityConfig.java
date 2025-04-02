@@ -17,15 +17,24 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Configurazione di sicurezza per l'applicazione.
+ */
 @Configuration
 public class SecurityConfig {
 
     private final UserService userService;
 
+    /**
+     * Costruttore per iniezione delle dipendenze.
+     */
     public SecurityConfig(UserService userService) {
         this.userService = userService;
     }
 
+    /**
+     * Configura la catena di filtri di sicurezza.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -56,6 +65,9 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Configura le impostazioni CORS.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -70,6 +82,9 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Gestore di successo dell'autenticazione personalizzato.
+     */
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
         return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {

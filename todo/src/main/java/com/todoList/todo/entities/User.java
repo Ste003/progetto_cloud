@@ -18,6 +18,9 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+/**
+ * Entità JPA che rappresenta un utente.
+ */
 @Entity
 @Table(name = "users")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -53,67 +56,69 @@ public class User {
     public User() {
     }
 
+    /**
+     * Costruttore per inizializzare nome ed email.
+     */
     public User(String name, String email) {
         this.name = name;
         this.email = email;
     }
 
     // Getters e setters
-    public Long getId() {
-        return id;
+    public Long getId() { 
+        return id; 
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setId(Long id) { 
+        this.id = id; 
     }
 
-    public String getName() {
-        return name;
+    public String getName() { 
+        return name; 
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String name) { 
+        this.name = name; 
     }
 
-    public String getEmail() {
-        return email;
+    public String getEmail() { 
+        return email; 
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEmail(String email) { 
+        this.email = email; 
     }
 
-    public List<TodoItem> getCreatedTodos() {
-        return createdTodos;
+    public List<TodoItem> getCreatedTodos() { 
+        return createdTodos; 
     }
 
-    public void setCreatedTodos(List<TodoItem> createdTodos) {
-        this.createdTodos = createdTodos;
+    public void setCreatedTodos(List<TodoItem> createdTodos) { 
+        this.createdTodos = createdTodos; 
     }
 
-    public List<TodoItem> getSubscribedTodos() {
-        return subscribedTodos;
+    public List<TodoItem> getSubscribedTodos() { 
+        return subscribedTodos; 
     }
 
-    public void setSubscribedTodos(List<TodoItem> subscribedTodos) {
-        this.subscribedTodos = subscribedTodos;
+    public void setSubscribedTodos(List<TodoItem> subscribedTodos) { 
+        this.subscribedTodos = subscribedTodos; 
     }
 
-    // Se non usi Lombok o vuoi essere sicuro che il getter esista:
-    public List<TodoItem> getTodoItems() {
-        return this.todoItems;
+    public List<TodoItem> getTodoItems() { 
+        return this.todoItems; 
     }
 
-    public void setTodoItems(List<TodoItem> todoItems) {
-        this.todoItems = todoItems;
+    public void setTodoItems(List<TodoItem> todoItems) { 
+        this.todoItems = todoItems; 
     }
 
-    public String getTelegramChatId() {
-        return telegramChatId;
+    public String getTelegramChatId() { 
+        return telegramChatId; 
     }
 
-    public void setTelegramChatId(String telegramChatId) {
-        this.telegramChatId = telegramChatId;
+    public void setTelegramChatId(String telegramChatId) { 
+        this.telegramChatId = telegramChatId; 
     }
 
 }

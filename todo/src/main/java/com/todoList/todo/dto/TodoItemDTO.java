@@ -1,5 +1,8 @@
 package com.todoList.todo.dto;
 
+/**
+ * Data Transfer Object (DTO) per rappresentare una To-Do.
+ */
 public class TodoItemDTO {
     private Long id;
     private String title;
@@ -11,7 +14,9 @@ public class TodoItemDTO {
 
     public TodoItemDTO() {}
 
-    // Costruttore a 4 parametri (senza subscribed; imposta default false)
+    /**
+     * Costruttore a 4 parametri (senza subscribed; imposta default false).
+     */
     public TodoItemDTO(Long id, String title, Boolean completed, String creatorEmail) {
         this.id = id;
         this.title = title;
@@ -21,7 +26,9 @@ public class TodoItemDTO {
         this.completedByEmail = null;
     }
 
-    // Costruttore a 3 parametri (senza email; non usato per la home)
+    /**
+     * Costruttore a 3 parametri (senza email; non usato per la home).
+     */
     public TodoItemDTO(Long id, String title, Boolean completed) {
         this.id = id;
         this.title = title;
@@ -31,7 +38,9 @@ public class TodoItemDTO {
         this.completedByEmail = null;
     }
 
-    // Costruttore a 5 parametri, per settare esplicitamente anche subscribed
+    /**
+     * Costruttore a 5 parametri, per settare esplicitamente anche subscribed.
+     */
     public TodoItemDTO(Long id, String title, Boolean completed, String creatorEmail, Boolean subscribed) {
         this.id = id;
         this.title = title;
@@ -41,7 +50,9 @@ public class TodoItemDTO {
         this.completedByEmail = null;
     }
 
-    // Costruttore a 7 parametri, per settare anche completedByEmail e completedByName
+    /**
+     * Costruttore a 7 parametri, per settare anche completedByEmail e completedByName.
+     */
     public TodoItemDTO(Long id, String title, Boolean completed, String creatorEmail, Boolean subscribed, String completedByEmail, String completedByName) {
         this.id = id;
         this.title = title;

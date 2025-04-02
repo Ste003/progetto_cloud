@@ -16,6 +16,9 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/**
+ * Entità JPA che rappresenta una To-Do.
+ */
 @Entity
 @Table(name = "todo_item")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -46,52 +49,52 @@ public class TodoItem {
     private User completedBy;
 
     // Getters e setters
-    public Long getId() {
-        return id;
+    public Long getId() { 
+        return id; 
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setId(Long id) { 
+        this.id = id; 
     }
 
-    public String getTitle() {
-        return title;
+    public String getTitle() { 
+        return title; 
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setTitle(String title) { 
+        this.title = title; 
     }
 
-    public Boolean getCompleted() {
-        return completed;
+    public Boolean getCompleted() { 
+        return completed; 
     }
 
-    public void setCompleted(Boolean completed) {
-        this.completed = completed;
+    public void setCompleted(Boolean completed) { 
+        this.completed = completed; 
     }
 
-    public User getUser() {
-        return user;
+    public User getUser() { 
+        return user; 
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUser(User user) { 
+        this.user = user; 
     }
 
-    public List<User> getSubscribers() {
-        return subscribers;
+    public List<User> getSubscribers() { 
+        return subscribers; 
     }
 
-    public void setSubscribers(List<User> subscribers) {
-        this.subscribers = subscribers;
+    public void setSubscribers(List<User> subscribers) { 
+        this.subscribers = subscribers; 
     }
 
-    public User getCompletedBy() {
-        return completedBy;
+    public User getCompletedBy() { 
+        return completedBy; 
     }
 
-    public void setCompletedBy(User completedBy) {
-        this.completedBy = completedBy;
+    public void setCompletedBy(User completedBy) { 
+        this.completedBy = completedBy; 
     }
 
 }

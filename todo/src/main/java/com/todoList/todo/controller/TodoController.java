@@ -21,20 +21,34 @@ import com.todoList.todo.repository.TodoItemRepository;
 import com.todoList.todo.repository.UserRepository;
 import com.todoList.todo.service.TodoService;
 
+/**
+ * Controller per la gestione delle To-Do.
+ * 
+ * Espone endpoint per:
+ * - Recuperare tutte le To-Do
+ * - Recuperare le To-Do incomplete
+ * - Creare una nuova To-Do
+ */
 @RestController
-@RequestMapping("/api/todos")
+@RequestMapping("/api/todos") // Mappa il controller sull'endpoint /api/todos
 public class TodoController {
 
     private final TodoItemRepository todoItemRepository;
     private final TodoService todoService;
     private final UserRepository userRepository;
 
+    /**
+     * Costruttore per iniezione delle dipendenze.
+     */
     public TodoController(TodoItemRepository todoItemRepository, TodoService todoService, UserRepository userRepository) {
         this.todoItemRepository = todoItemRepository;
         this.todoService = todoService;
         this.userRepository = userRepository;
     }
 
+    /**
+     * Recupera tutte le To-Do.
+     */
     @GetMapping
     public List<TodoItemDTO> getAllTodos(@AuthenticationPrincipal OAuth2User principal) {
         String currentUserEmail = principal != null ? principal.getAttribute("email") : "";
@@ -49,9 +63,12 @@ public class TodoController {
                         (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
                         (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
                 ))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); // Restituisce la lista delle To-Do
     }
 
+    /**
+     * Recupera le To-Do incomplete.
+     */
     @GetMapping("/incomplete")
     public List<TodoItemDTO> getIncompleteTodos(@AuthenticationPrincipal OAuth2User principal) {
         String currentUserEmail = principal != null ? principal.getAttribute("email") : "";
@@ -66,23 +83,26 @@ public class TodoController {
                         (todo.getCompletedBy() != null ? todo.getCompletedBy().getEmail() : null),
                         (todo.getCompletedBy() != null ? todo.getCompletedBy().getName() : null)
                 ))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); // Restituisce la lista delle To-Do incomplete
     }
 
+    /**
+     * Crea una nuova To-Do.
+     */
     @PostMapping("/create")
     public ResponseEntity<TodoItem> createTodo(@RequestBody java.util.Map<String, String> payload,
             @AuthenticationPrincipal OAuth2User principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Restituisce 401 se l'utente non è autenticato
         }
         String title = payload.get("title");
         if (title == null || title.trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build(); // Restituisce 400 se il titolo è vuoto
         }
         String email = principal.getAttribute("email");
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (!userOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Restituisce 404 se l'utente non è trovato
         }
         User user = userOpt.get();
 
@@ -92,6 +112,6 @@ public class TodoController {
         todo.setUser(user); // Imposta il creatore
 
         TodoItem savedTodo = todoService.createTodo(todo);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTodo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTodo); // Restituisce 201 con la To-Do creata
     }
 }
