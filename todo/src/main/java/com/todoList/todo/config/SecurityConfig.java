@@ -2,79 +2,104 @@ package com.todoList.todo.config;
 
 import com.todoList.todo.entities.User;
 import com.todoList.todo.service.UserService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.Authentication;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
-/**
- * Configurazione di sicurezza per l'applicazione.
- */
+import java.io.IOException;
+import java.util.*;
+
 @Configuration
 public class SecurityConfig {
 
     private final UserService userService;
 
-    /**
-     * Costruttore per iniezione delle dipendenze.
-     */
     public SecurityConfig(UserService userService) {
         this.userService = userService;
     }
 
-    /**
-     * Configura la catena di filtri di sicurezza.
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Configurazione CORS
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            // Disabilita CSRF per facilitare i test (valuta se abilitarlo in produzione)
-            .csrf(csrf -> csrf.disable())
-            // Definizione degli endpoint pubblici e protetti
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/error", "/telegram/webhook").permitAll()
-                .anyRequest().authenticated()
-            )
-            // Configurazione OAuth2 per il login
-            .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl("http://localhost:5173/home", true)
-                .successHandler(customAuthenticationSuccessHandler())
-                .loginPage("/login")
-            )
-            // Configurazione del logout
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .logoutSuccessHandler((HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-                })
-            );
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/login", "/error", "/telegram/webhook").permitAll()
+                        .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("http://localhost:5173/home", true)
+                        .successHandler(customAuthenticationSuccessHandler())
+                        .loginPage("/login"))
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessHandler((request, response, authentication) -> response
+                                .setStatus(HttpServletResponse.SC_NO_CONTENT)));
+
+        // Aggiunge il filtro dopo l'autenticazione username/password
+        http.addFilterAfter(sameSiteCookieFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
-    /**
-     * Configura le impostazioni CORS.
-     */
+    @Bean
+    public OncePerRequestFilter sameSiteCookieFilter() {
+        return new OncePerRequestFilter() {
+            @Override
+            protected void doFilterInternal(HttpServletRequest request,
+                    HttpServletResponse response,
+                    FilterChain filterChain)
+                    throws ServletException, IOException {
+
+                filterChain.doFilter(request, response);
+
+                Collection<String> headers = response.getHeaders("Set-Cookie");
+                if (headers.isEmpty()) {
+                    return;
+                }
+
+                boolean isSecure = request.isSecure()
+                        || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
+
+                List<String> modified = new ArrayList<>();
+                for (String header : headers) {
+                    if (header.toLowerCase().startsWith("jsessionid")) {
+                        modified.add(header + (isSecure
+                                ? "; SameSite=None; Secure"
+                                : "; SameSite=Lax"));
+                    } else {
+                        modified.add(header);
+                    }
+                }
+
+                response.setHeader("Set-Cookie", String.join(",", modified));
+            }
+
+        };
+    }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permetti il frontend in esecuzione su localhost:5173
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "https://tuo-dominio.com" // sostituisci con l'URL del tuo cloud
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -82,20 +107,18 @@ public class SecurityConfig {
         return source;
     }
 
-    /**
-     * Gestore di successo dell'autenticazione personalizzato.
-     */
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-        return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+        return (request, response, authentication) -> {
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
             String email = oAuth2User.getAttribute("email");
-            Optional<User> existingUserOpt = userService.getUserByEmail(email);
-            if (existingUserOpt.isEmpty()) {
+
+            userService.getUserByEmail(email).orElseGet(() -> {
                 String name = oAuth2User.getAttribute("name");
-                User newUser = new User(name, email);
-                userService.createUser(newUser);
-            }
+                return userService.createUser(new User(name, email));
+            });
+
+            // redirect post-login
             response.sendRedirect("http://localhost:5173/home");
         };
     }
