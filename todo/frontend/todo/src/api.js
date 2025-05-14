@@ -1,5 +1,6 @@
 import axios from "axios";
 
+axios.defaults.withCredentials = true;  // fa inviare i cookie su ogni richiesta
 const API_URL = "http://localhost:8080/api/todos"; // Cambia la porta se serve
 
 export const fetchTodos = async () => {

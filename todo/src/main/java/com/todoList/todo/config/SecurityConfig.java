@@ -71,8 +71,13 @@ public class SecurityConfig {
                     return;
                 }
 
-                boolean isSecure = request.isSecure()
-                        || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
+                // boolean isSecure = request.isSecure()
+                //         || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
+                boolean isProduction = !request.getServerName().contains("localhost");
+                boolean isSecure = isProduction
+                    || request.isSecure()
+                    || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
+
 
                 List<String> modified = new ArrayList<>();
                 for (String header : headers) {
