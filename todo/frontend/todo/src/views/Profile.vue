@@ -17,9 +17,7 @@
           <li v-for="todo in createdTodos.filter(todo => !todo.completed)" :key="todo.id">
             <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">In sospeso</span>
-            <button @click="completeTodo(todo.id)" class="action-btn">
-              Chiudi
-            </button>
+            <button @click="completeTodo(todo.id)" class="action-btn">Chiudi</button>
           </li>
         </ul>
         <p v-if="createdTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">
@@ -32,9 +30,7 @@
           <li v-for="todo in subscribedTodos.filter(todo => !todo.completed)" :key="todo.id">
             <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">Completato: {{ todo.completed ? 'Sì' : 'No' }}</span>
-            <button v-if="!todo.completed" @click="completeTodo(todo.id)" class="action-btn">
-              Chiudi
-            </button>
+            <button v-if="!todo.completed" @click="completeTodo(todo.id)" class="action-btn">Chiudi</button>
           </li>
         </ul>
         <p v-if="subscribedTodos.filter(todo => !todo.completed).length === 0" class="empty-msg">
@@ -51,9 +47,7 @@
           <li v-for="todo in incompleteTodos" :key="todo.id">
             <span class="todo-title">{{ todo.title }}</span> -
             <span class="todo-status">In sospeso</span>
-            <button @click="completeTodo(todo.id)" class="action-btn">
-              Chiudi
-            </button>
+            <button @click="completeTodo(todo.id)" class="action-btn">Chiudi</button>
           </li>
         </ul>
         <p v-if="incompleteTodos.length === 0" class="empty-msg">
@@ -77,40 +71,57 @@
       </div>
     </div>
 
-    <!-- Sezione per mostrare/nascondi le todo completate degli utenti -->
-    <div class="todos-section toggle-section" v-if="!isAdmin">
+    <!-- Sezione per mostrare/nascondere le todo completate -->
+    <div class="todos-section toggle-section">
       <h2 @click="toggleCompletedTodosVisibility" class="toggle-btn">
         <span>{{ showCompletedTodos ? 'Nascondi' : 'Mostra' }} Todo Completate</span>
       </h2>
       <div v-if="showCompletedTodos">
-        <!-- Contenuto della sezione -->
-        <div class="todos-section completed-todos">
-          <h3>Todo Completate da te</h3>
-          <ul>
-            <li v-for="todo in completedCreatedTodos" :key="todo.id">
-              <span class="todo-title">{{ todo.title }}</span> -
-              <span class="todo-status">
-                {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
-              </span>
-            </li>
-          </ul>
-          <p v-if="completedCreatedTodos.length === 0" class="empty-msg">
-            Non hai completato nessuna todo.
-          </p>
+        <div v-if="!isAdmin">
+          <div class="todos-section completed-todos">
+            <h3>Todo Completate da te</h3>
+            <ul>
+              <li v-for="todo in completedCreatedTodos" :key="todo.id">
+                <span class="todo-title">{{ todo.title }}</span> -
+                <span class="todo-status">
+                  {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
+                </span>
+              </li>
+            </ul>
+            <p v-if="completedCreatedTodos.length === 0" class="empty-msg">
+              Non hai completato nessuna todo.
+            </p>
+          </div>
+          <div class="todos-section completed-todos">
+            <h3>Todo Completate a cui eri iscritto</h3>
+            <ul>
+              <li v-for="todo in completedSubscribedTodos" :key="todo.id">
+                <span class="todo-title">{{ todo.title }}</span> -
+                <span class="todo-status">
+                  {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
+                </span>
+              </li>
+            </ul>
+            <p v-if="completedSubscribedTodos.length === 0" class="empty-msg">
+              Non sei iscritto a nessuna todo completata.
+            </p>
+          </div>
         </div>
-        <div class="todos-section completed-todos">
-          <h3>Todo Completate a cui eri iscritto</h3>
-          <ul>
-            <li v-for="todo in completedSubscribedTodos" :key="todo.id">
-              <span class="todo-title">{{ todo.title }}</span> -
-              <span class="todo-status">
-                {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
-              </span>
-            </li>
-          </ul>
-          <p v-if="completedSubscribedTodos.length === 0" class="empty-msg">
-            Non sei iscritto a nessuna todo completata.
-          </p>
+        <div v-else>
+          <div class="todos-section completed-todos">
+            <h3>Tutte le Todo Completate</h3>
+            <ul>
+              <li v-for="todo in completedTodos" :key="todo.id">
+                <span class="todo-title">{{ todo.title }}</span> -
+                <span class="todo-status">
+                  {{ todo.completedByName ? 'Completata da: ' + todo.completedByName : 'Completata' }}
+                </span>
+              </li>
+            </ul>
+            <p v-if="completedTodos.length === 0" class="empty-msg">
+              Non ci sono todo completate.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -203,18 +214,9 @@ export default {
         console.error("Errore nel completamento della todo:", error);
       }
     },
-    async completeAllTodos() {
-      try {
-        await axios.patch("http://localhost:8080/profile/todos/complete", {}, { withCredentials: true });
-        await this.fetchAllTodos();
-        this.separateTodos();
-      } catch (error) {
-        console.error("Errore nel chiudere tutte le todo:", error);
-      }
-    },
     toggleCompletedTodosVisibility() {
       this.showCompletedTodos = !this.showCompletedTodos;
-      if (this.showCompletedTodos) {
+      if (!this.isAdmin) {
         this.completedCreatedTodos = this.createdTodos.filter(todo => todo.completed);
         this.completedSubscribedTodos = this.subscribedTodos.filter(todo => todo.completed);
       }
